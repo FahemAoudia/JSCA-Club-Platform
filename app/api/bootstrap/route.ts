@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { requireDashboardAdmin } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { mapMediaRowForJsonTransport } from "@/lib/media-inline-proxy";
 
 export async function GET() {
   const guard = await requireDashboardAdmin();
@@ -61,6 +62,8 @@ export async function GET() {
     db.mediaItem.findMany(),
   ]);
 
+  const mediaOut = media.map((m) => mapMediaRowForJsonTransport(m));
+
   return NextResponse.json({
     ok: true,
     data: {
@@ -88,7 +91,7 @@ export async function GET() {
       adminUsers,
       activities,
       news,
-      media,
+      media: mediaOut,
     },
   });
 }

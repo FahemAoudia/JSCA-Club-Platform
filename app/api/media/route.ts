@@ -2,13 +2,17 @@ import { NextResponse } from "next/server";
 
 import { requireDashboardAdmin } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { mapMediaRowForJsonTransport } from "@/lib/media-inline-proxy";
 import type { Prisma } from "@prisma/client";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const guard = await requireDashboardAdmin();
   if (guard) return guard;
   const rows = await db.mediaItem.findMany({ orderBy: { id: "asc" } });
-  return NextResponse.json({ ok: true, data: rows });
+  const data = rows.map((r) => mapMediaRowForJsonTransport(r));
+  return NextResponse.json({ ok: true, data });
 }
 
 export async function POST(request: Request) {

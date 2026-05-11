@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
 import { mergeActualitesCopy, mergeLandingCopy } from "@/lib/landing-merge";
+import { mapLogoUrlForJsonTransport, mapMediaRowForJsonTransport } from "@/lib/media-inline-proxy";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,10 @@ export async function GET() {
     ar: mergeActualitesCopy("ar", row?.actualitesAr),
   };
 
+  const mediaOut = media.map((m) => mapMediaRowForJsonTransport(m));
+  const logoRaw = row?.logoUrl?.trim() || "/branding/jsca-logo.png";
+  const logoUrl = mapLogoUrlForJsonTransport(logoRaw) ?? "/branding/jsca-logo.png";
+
   return NextResponse.json({
     ok: true,
     data: {
@@ -40,8 +45,8 @@ export async function GET() {
         email: club.email,
       },
       news,
-      media,
-      logoUrl: row?.logoUrl?.trim() || "/branding/jsca-logo.png",
+      media: mediaOut,
+      logoUrl,
       bannerEmoji: row?.bannerEmoji?.trim() || "ⵣ",
     },
   });
