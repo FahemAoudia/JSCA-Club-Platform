@@ -17,6 +17,10 @@ DATABASE_URL=postgresql://...
 
 > En production Vercel: **Vercel Postgres** fournit souvent `POSTGRES_URL` ; **Neon** fournit souvent `DATABASE_URL`. L’application lit les deux.
 
+### Photos sportifs / entraîneurs (Vercel)
+
+Le disque du déploiement Vercel n’est **pas** un stockage de fichiers persistant. Sur Vercel (`VERCEL=1`), les photos sont enregistrées en **`data:` URL** dans le champ `photoUrl` (max **1 Mo** par image). En local, les fichiers restent sous `public/uploads/...`.
+
 ## Installation
 
 ```bash

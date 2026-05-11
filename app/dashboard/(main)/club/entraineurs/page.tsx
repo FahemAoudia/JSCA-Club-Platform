@@ -33,7 +33,11 @@ function categoryLabels(cats: Category[]) {
     .join(", ");
 }
 
-async function uploadClubCoachPhoto(coachId: string, file: File) {
+type CoachPhotoUploadResult =
+  | { ok: true; coach: ClubCoach }
+  | { ok: false; message?: string };
+
+async function uploadClubCoachPhoto(coachId: string, file: File): Promise<CoachPhotoUploadResult> {
   const fd = new FormData();
   fd.append("file", file);
   const res = await fetch(`/api/club-coaches/${coachId}/photo`, {
@@ -41,9 +45,15 @@ async function uploadClubCoachPhoto(coachId: string, file: File) {
     body: fd,
     credentials: "include",
   });
-  const json = (await res.json().catch(() => null)) as { ok?: boolean; data?: ClubCoach } | null;
-  if (!res.ok || !json?.ok || !json.data) return null;
-  return json.data;
+  const json = (await res.json().catch(() => null)) as {
+    ok?: boolean;
+    data?: ClubCoach;
+    message?: string;
+  } | null;
+  if (!res.ok || !json?.ok || !json.data) {
+    return { ok: false, message: json?.message };
+  }
+  return { ok: true, coach: json.data };
 }
 
 function emptyDraft(sn: string, lic: string): Omit<ClubCoach, "id"> {
@@ -136,15 +146,17 @@ export default function ClubEntraineursPage() {
 
       if (pendingPhoto) {
         const uploaded = await uploadClubCoachPhoto(created.id, pendingPhoto);
-        if (!uploaded) {
+        if (!uploaded.ok) {
           toast.push({
             tone: "info",
             title: "Photo non enregistrée",
-            description: "La fiche est enregistrée ; l’envoi de la photo a échoué. Réessayez depuis une future édition ou supprimez et recréez.",
+            description:
+              uploaded.message ??
+              "La fiche est enregistrée ; l’envoi de la photo a échoué. Réessayez depuis une future édition ou supprimez et recréez.",
           });
         } else {
           useJscaStore.setState((s) => ({
-            clubCoaches: s.clubCoaches.map((c) => (c.id === created.id ? uploaded : c)),
+            clubCoaches: s.clubCoaches.map((c) => (c.id === created.id ? uploaded.coach : c)),
           }));
         }
         setPendingPhoto(null);

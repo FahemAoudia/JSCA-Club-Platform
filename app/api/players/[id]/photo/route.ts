@@ -1,24 +1,13 @@
-import { mkdir, unlink, writeFile } from "fs/promises";
-import { join } from "path";
-
 import { NextResponse } from "next/server";
 
 import { requireDashboardAdmin } from "@/lib/api-auth";
+import { saveDashboardPhoto } from "@/lib/dashboard-photo-storage";
 import { db } from "@/lib/db";
 
 export const runtime = "nodejs";
 
-const UPLOAD_SUBDIR = "uploads/players";
 const MAX_BYTES = 4 * 1024 * 1024;
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
-
-function extForMime(mime: string) {
-  if (mime === "image/jpeg") return ".jpg";
-  if (mime === "image/png") return ".png";
-  if (mime === "image/webp") return ".webp";
-  if (mime === "image/gif") return ".gif";
-  return ".bin";
-}
 
 export async function POST(request: Request, ctx: { params: Promise<{ id: string }> }) {
   const guard = await requireDashboardAdmin();
@@ -47,32 +36,30 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
   }
 
   const buf = Buffer.from(await blob.arrayBuffer());
-  if (buf.length > MAX_BYTES) {
-    return NextResponse.json({ ok: false, error: "too_large" }, { status: 413 });
-  }
 
-  const ext = extForMime(mime);
-  const filename = `${id}-${Date.now()}${ext}`;
-  const dir = join(process.cwd(), "public", UPLOAD_SUBDIR);
-  await mkdir(dir, { recursive: true });
-  const fullPath = join(dir, filename);
-  await writeFile(fullPath, buf);
+  const stored = await saveDashboardPhoto({
+    entityId: id,
+    subdir: "uploads/players",
+    mime,
+    buf,
+    maxBytesOnDisk: MAX_BYTES,
+    existingUrl: existing.photoUrl,
+  });
 
-  const publicUrl = `/${UPLOAD_SUBDIR}/${filename}`;
-
-  const old = existing.photoUrl;
-  if (old && old.startsWith(`/${UPLOAD_SUBDIR}/`)) {
-    const oldPath = join(process.cwd(), "public", old.replace(/^\//, ""));
-    try {
-      await unlink(oldPath);
-    } catch {
-      /* ignore missing file */
-    }
+  if (!stored.ok) {
+    const msg =
+      stored.error === "too_large_vercel"
+        ? "Image trop lourde pour l’hébergement Vercel (max 1 Mo). Réduisez la taille ou compressez la photo."
+        : undefined;
+    return NextResponse.json(
+      { ok: false, error: stored.error, message: msg },
+      { status: stored.status },
+    );
   }
 
   const updated = await db.player.update({
     where: { id },
-    data: { photoUrl: publicUrl },
+    data: { photoUrl: stored.publicUrl },
   });
 
   return NextResponse.json({ ok: true, data: updated });

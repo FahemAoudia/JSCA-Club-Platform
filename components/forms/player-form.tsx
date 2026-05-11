@@ -38,7 +38,11 @@ function autoLicense(branch: Player["branch"], sportNumber: string) {
   return `${branch.toUpperCase()}-JSCA-${year}-${sportNumber}`;
 }
 
-async function uploadPlayerPhoto(playerId: string, file: File) {
+type PlayerPhotoUploadResult =
+  | { ok: true; player: Player }
+  | { ok: false; message?: string };
+
+async function uploadPlayerPhoto(playerId: string, file: File): Promise<PlayerPhotoUploadResult> {
   const fd = new FormData();
   fd.append("file", file);
   const res = await fetch(`/api/players/${playerId}/photo`, {
@@ -46,9 +50,15 @@ async function uploadPlayerPhoto(playerId: string, file: File) {
     body: fd,
     credentials: "include",
   });
-  const json = (await res.json().catch(() => null)) as { ok?: boolean; data?: Player } | null;
-  if (!res.ok || !json?.ok || !json.data) return null;
-  return json.data;
+  const json = (await res.json().catch(() => null)) as {
+    ok?: boolean;
+    data?: Player;
+    message?: string;
+  } | null;
+  if (!res.ok || !json?.ok || !json.data) {
+    return { ok: false, message: json?.message };
+  }
+  return { ok: true, player: json.data };
 }
 
 const emptyPlayer: Omit<Player, "id"> = {
@@ -166,18 +176,20 @@ export function PlayerForm({
 
       if (pendingPhoto && targetId) {
         const uploaded = await uploadPlayerPhoto(targetId, pendingPhoto);
-        if (!uploaded) {
+        if (!uploaded.ok) {
           toast.push({
             tone: "info",
             title: "Photo non enregistrée",
-            description: "La fiche est sauvegardée, mais l’envoi de la photo a échoué. Réessayez.",
+            description:
+              uploaded.message ??
+              "La fiche est sauvegardée, mais l’envoi de la photo a échoué. Réessayez.",
           });
         } else {
           useJscaStore.setState((s) => ({
-            players: s.players.map((p) => (p.id === targetId ? uploaded : p)),
+            players: s.players.map((p) => (p.id === targetId ? uploaded.player : p)),
           }));
           if (playerId) {
-            setForm((f) => ({ ...f, photoUrl: uploaded.photoUrl }));
+            setForm((f) => ({ ...f, photoUrl: uploaded.player.photoUrl }));
           }
         }
         setPendingPhoto(null);
