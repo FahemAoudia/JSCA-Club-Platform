@@ -18,7 +18,7 @@ function categoryLabel(c: Category) {
   return CATEGORY_OPTIONS.find((o) => o.value === c)?.label ?? c.toUpperCase();
 }
 
-export default function DirigeantCardsPrintPage() {
+function DirigeantCardsPrintPage() {
   const adherents = useJscaStore((s) => s.adherents);
   const sportGroups = useJscaStore((s) => s.sportGroups);
   const search = useSearchParams();
@@ -212,5 +212,19 @@ export default function DirigeantCardsPrintPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function DirigeantCardsPrintPageWrapper() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
+          Chargement des cartes…
+        </div>
+      }
+    >
+      <DirigeantCardsPrintPage />
+    </React.Suspense>
   );
 }

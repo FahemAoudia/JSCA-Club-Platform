@@ -18,7 +18,7 @@ function categoryLabel(c: Category) {
   return CATEGORY_OPTIONS.find((o) => o.value === c)?.label ?? c.toUpperCase();
 }
 
-export default function CoachCardsPrintPage() {
+function CoachCardsPrintPage() {
   const clubCoaches = useJscaStore((s) => s.clubCoaches);
   const search = useSearchParams();
   const selectedId = search.get("id");
@@ -217,5 +217,19 @@ export default function CoachCardsPrintPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function CoachCardsPrintPageWrapper() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
+          Chargement des cartes…
+        </div>
+      }
+    >
+      <CoachCardsPrintPage />
+    </React.Suspense>
   );
 }

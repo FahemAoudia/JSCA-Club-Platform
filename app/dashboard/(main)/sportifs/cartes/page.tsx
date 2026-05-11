@@ -37,7 +37,7 @@ function computeAutoSportNumbers<T extends { id: string; sportNumber: string }>(
   return out;
 }
 
-export default function PlayerCardsFrontPrintPage() {
+function PlayerCardsFrontPrintPage() {
   const players = useJscaStore((s) => s.players);
   const search = useSearchParams();
   const selectedId = search.get("id");
@@ -239,5 +239,19 @@ export default function PlayerCardsFrontPrintPage() {
         })}
       </div>
     </div>
+  );
+}
+
+export default function PlayerCardsFrontPrintPageWrapper() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
+          Chargement des cartes…
+        </div>
+      }
+    >
+      <PlayerCardsFrontPrintPage />
+    </React.Suspense>
   );
 }

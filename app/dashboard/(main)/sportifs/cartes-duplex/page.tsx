@@ -262,7 +262,7 @@ function VersoCard({
   );
 }
 
-export default function CartesDuplexPrintPage() {
+function CartesDuplexPrintPage() {
   const players = useJscaStore((s) => s.players);
   const search = useSearchParams();
   const selectedId = search.get("id");
@@ -386,3 +386,16 @@ export default function CartesDuplexPrintPage() {
   );
 }
 
+export default function CartesDuplexPrintPageWrapper() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
+          Chargement des cartes…
+        </div>
+      }
+    >
+      <CartesDuplexPrintPage />
+    </React.Suspense>
+  );
+}

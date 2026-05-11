@@ -37,7 +37,7 @@ function computeAutoSportNumbers<T extends { id: string; sportNumber: string }>(
   return out;
 }
 
-export default function PlayerCardsBackPrintPage() {
+function PlayerCardsBackPrintPage() {
   const players = useJscaStore((s) => s.players);
   const search = useSearchParams();
   const selectedId = search.get("id");
@@ -195,5 +195,19 @@ export default function PlayerCardsBackPrintPage() {
         })}
       </div>
     </div>
+  );
+}
+
+export default function PlayerCardsBackPrintPageWrapper() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
+          Chargement des cartes…
+        </div>
+      }
+    >
+      <PlayerCardsBackPrintPage />
+    </React.Suspense>
   );
 }
