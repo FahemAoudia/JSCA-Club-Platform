@@ -29,5 +29,5 @@ export function id(prefix: string) {
 
 /** Local URLs with a query string need `images.localPatterns` in next.config, or `unoptimized` on `next/image`. */
 export function nextImageUnoptimized(src: string) {
-  return src.startsWith("http") || src.includes("?");
+  return src.startsWith("data:") || src.startsWith("http") || src.includes("?");
 }

@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import {
   PUBLIC_IMAGE_MAX_BYTES,
   PUBLIC_IMAGE_MIME,
+  PUBLIC_IMAGE_VERCEL_INLINE_MAX_BYTES,
   publicImageExt,
   tryDeletePublicFile,
   writePublicUpload,
@@ -40,13 +41,30 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
   }
 
   const buf = Buffer.from(await blob.arrayBuffer());
-  if (buf.length > PUBLIC_IMAGE_MAX_BYTES) {
-    return NextResponse.json({ ok: false, error: "too_large" }, { status: 413 });
+  const maxBytes =
+    process.env.VERCEL === "1" ? PUBLIC_IMAGE_VERCEL_INLINE_MAX_BYTES : PUBLIC_IMAGE_MAX_BYTES;
+  if (buf.length > maxBytes) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "too_large",
+        message:
+          process.env.VERCEL === "1"
+            ? "Image trop lourde pour Vercel (max 1 Mo). Compressez ou réduisez la taille."
+            : "Fichier trop volumineux (max 4 Mo).",
+      },
+      { status: 413 },
+    );
   }
 
   const ext = publicImageExt(mime);
   const filename = `${id}-${Date.now()}${ext}`;
-  const publicUrl = await writePublicUpload(SUBDIR, filename, buf);
+  let publicUrl: string;
+  try {
+    publicUrl = await writePublicUpload(SUBDIR, filename, buf, mime);
+  } catch {
+    return NextResponse.json({ ok: false, error: "write_failed" }, { status: 500 });
+  }
 
   const oldSrc = existing.src;
   const oldThumb = existing.thumb;

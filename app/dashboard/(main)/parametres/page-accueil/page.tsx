@@ -338,13 +338,25 @@ export default function PageAccueilSettingsPage() {
                         });
                         const json = (await res.json().catch(() => null)) as {
                           ok?: boolean;
+                          message?: string;
                           data?: { logoUrl: string | null };
                         } | null;
-                        if (!res.ok || !json?.ok || !json.data?.logoUrl) throw new Error("x");
+                        if (!res.ok || !json?.ok || !json.data?.logoUrl) {
+                          toast.push({
+                            tone: "error",
+                            title: "Échec envoi du logo",
+                            description: json?.message ?? "Réessayez ou vérifiez le format.",
+                          });
+                          return;
+                        }
                         setLogoUrl(json.data.logoUrl);
                         toast.push({ tone: "success", title: "Logo enregistré" });
                       } catch {
-                        toast.push({ tone: "error", title: "Échec envoi du logo" });
+                        toast.push({
+                          tone: "error",
+                          title: "Échec envoi du logo",
+                          description: "Erreur réseau.",
+                        });
                       } finally {
                         setSaving(false);
                       }
@@ -552,13 +564,28 @@ export default function PageAccueilSettingsPage() {
                               body: fd,
                               credentials: "include",
                             });
-                            const json = (await res.json().catch(() => null)) as { ok?: boolean; data?: MediaItem } | null;
-                            if (!res.ok || !json?.ok || !json.data) throw new Error("x");
+                            const json = (await res.json().catch(() => null)) as {
+                              ok?: boolean;
+                              message?: string;
+                              data?: MediaItem;
+                            } | null;
+                            if (!res.ok || !json?.ok || !json.data) {
+                              toast.push({
+                                tone: "error",
+                                title: "Échec envoi de l’image",
+                                description: json?.message ?? "Réessayez ou vérifiez le format.",
+                              });
+                              return;
+                            }
                             setMedia((x) => x.map((r) => (r.id === m.id ? json.data! : r)));
                             toast.push({ tone: "success", title: "Image mise à jour" });
                             await load();
                           } catch {
-                            toast.push({ tone: "error", title: "Échec envoi de l’image" });
+                            toast.push({
+                              tone: "error",
+                              title: "Échec envoi de l’image",
+                              description: "Erreur réseau.",
+                            });
                           } finally {
                             setSaving(false);
                           }
@@ -732,6 +759,7 @@ function NewsCreateForm({ disabled, onCreated }: { disabled: boolean; onCreated:
 }
 
 function MediaCreateForm({ disabled, onCreated }: { disabled: boolean; onCreated: () => Promise<void> }) {
+  const toast = useToast();
   const [title, setTitle] = React.useState("");
   const [titleAr, setTitleAr] = React.useState("");
   const [file, setFile] = React.useState<File | null>(null);
@@ -775,12 +803,25 @@ function MediaCreateForm({ disabled, onCreated }: { disabled: boolean; onCreated
               body: fd,
               credentials: "include",
             });
-            const json = (await res.json().catch(() => null)) as { ok?: boolean } | null;
-            if (!res.ok || !json?.ok) throw new Error("x");
+            const json = (await res.json().catch(() => null)) as { ok?: boolean; message?: string } | null;
+            if (!res.ok || !json?.ok) {
+              toast.push({
+                tone: "error",
+                title: "Échec envoi du média",
+                description: json?.message ?? "Réessayez ou vérifiez le format.",
+              });
+              return;
+            }
             setTitle("");
             setTitleAr("");
             setFile(null);
             await onCreated();
+          } catch {
+            toast.push({
+              tone: "error",
+              title: "Échec envoi du média",
+              description: "Erreur réseau.",
+            });
           } finally {
             setBusy(false);
           }
