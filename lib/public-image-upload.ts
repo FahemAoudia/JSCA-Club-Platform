@@ -77,22 +77,36 @@ export async function writePublicUpload(
   buf: Buffer,
   mime = "image/jpeg",
 ): Promise<string> {
-  if (useVercelInlineImageStorage()) {
+  const safeMime = PUBLIC_IMAGE_MIME.has(mime) ? mime : "image/jpeg";
+  const inlineDataUrl = () => {
     if (buf.length > PUBLIC_IMAGE_VERCEL_INLINE_MAX_BYTES) {
       throw new Error("too_large_vercel");
     }
-    const safeMime = PUBLIC_IMAGE_MIME.has(mime) ? mime : "image/jpeg";
     return `data:${safeMime};base64,${buf.toString("base64")}`;
+  };
+
+  // Prefer inline storage on Vercel-like infra.
+  if (useVercelInlineImageStorage()) {
+    return inlineDataUrl();
   }
 
   if (buf.length > PUBLIC_IMAGE_MAX_BYTES) {
     throw new Error("too_large");
   }
 
-  const dir = join(process.cwd(), "public", subdir);
-  await mkdir(dir, { recursive: true });
-  await writeFile(join(dir, filename), buf);
-  return `/${subdir}/${filename}`;
+  // Disk write for local/dev. If the FS is read-only (Vercel), automatically fall back to inline.
+  try {
+    const dir = join(process.cwd(), "public", subdir);
+    await mkdir(dir, { recursive: true });
+    await writeFile(join(dir, filename), buf);
+    return `/${subdir}/${filename}`;
+  } catch (e) {
+    const code = e && typeof e === "object" && "code" in e ? String((e as { code?: unknown }).code) : "";
+    if (code === "EROFS" || code === "EPERM" || code === "EACCES") {
+      return inlineDataUrl();
+    }
+    throw e;
+  }
 }
 
 /** Chemin disque depuis une URL publique `/uploads/...`. */
