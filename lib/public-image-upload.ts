@@ -94,18 +94,19 @@ export async function writePublicUpload(
     throw new Error("too_large");
   }
 
-  // Disk write for local/dev. If the FS is read-only (Vercel), automatically fall back to inline.
+  // Disk write for local/dev. Sur Vercel, `mkdir` peut échouer en ENOENT et `writeFile` en EROFS :
+  // tout échec disque → fallback data URL (même si les env Vercel ne sont pas détectés).
   try {
     const dir = join(process.cwd(), "public", subdir);
     await mkdir(dir, { recursive: true });
     await writeFile(join(dir, filename), buf);
     return `/${subdir}/${filename}`;
   } catch (e) {
-    const code = e && typeof e === "object" && "code" in e ? String((e as { code?: unknown }).code) : "";
-    if (code === "EROFS" || code === "EPERM" || code === "EACCES") {
+    try {
       return inlineDataUrl();
+    } catch {
+      throw e;
     }
-    throw e;
   }
 }
 
