@@ -8,6 +8,13 @@ export async function requireDashboardAdmin() {
   const token = jar.get(DASH_SESSION_COOKIE)?.value;
   const authenticated = token === DASH_SESSION_VALUE;
   if (authenticated) return null;
-  return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  return NextResponse.json(
+    {
+      ok: false,
+      error: "unauthorized",
+      message: "Session expirée ou non connecté. Reconnectez-vous au tableau de bord.",
+    },
+    { status: 401 },
+  );
 }
 

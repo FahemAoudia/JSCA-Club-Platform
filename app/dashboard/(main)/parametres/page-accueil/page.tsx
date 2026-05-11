@@ -21,6 +21,12 @@ import { id as newId } from "@/lib/utils";
 const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,image/gif,image/*";
 const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 
+/** Certains OS n’envoient pas `file.type` : on accepte alors selon l’extension. */
+function fileLooksLikeImage(f: File): boolean {
+  if (f.type && IMAGE_TYPES.has(f.type)) return true;
+  return /\.(jpe?g|png|gif|webp)$/i.test(f.name);
+}
+
 type TabId =
   | "text-fr"
   | "text-ar"
@@ -319,7 +325,7 @@ export default function PageAccueilSettingsPage() {
                       const f = e.target.files?.[0];
                       e.target.value = "";
                       if (!f) return;
-                      if (!IMAGE_TYPES.has(f.type)) {
+                      if (!fileLooksLikeImage(f)) {
                         toast.push({
                           tone: "error",
                           title: "Format refusé",
@@ -339,17 +345,17 @@ export default function PageAccueilSettingsPage() {
                         const json = (await res.json().catch(() => null)) as {
                           ok?: boolean;
                           message?: string;
-                          data?: { logoUrl: string | null };
+                          error?: string;
                         } | null;
-                        if (!res.ok || !json?.ok || !json.data?.logoUrl) {
+                        if (!res.ok || !json?.ok) {
                           toast.push({
                             tone: "error",
                             title: "Échec envoi du logo",
-                            description: json?.message ?? "Réessayez ou vérifiez le format.",
+                            description: json?.message ?? json?.error ?? "Réessayez ou vérifiez le format.",
                           });
                           return;
                         }
-                        setLogoUrl(json.data.logoUrl);
+                        await load();
                         toast.push({ tone: "success", title: "Logo enregistré" });
                       } catch {
                         toast.push({
@@ -547,7 +553,7 @@ export default function PageAccueilSettingsPage() {
                           const f = e.target.files?.[0];
                           e.target.value = "";
                           if (!f) return;
-                          if (!IMAGE_TYPES.has(f.type)) {
+                          if (!fileLooksLikeImage(f)) {
                             toast.push({
                               tone: "error",
                               title: "Format refusé",
@@ -567,17 +573,16 @@ export default function PageAccueilSettingsPage() {
                             const json = (await res.json().catch(() => null)) as {
                               ok?: boolean;
                               message?: string;
-                              data?: MediaItem;
+                              error?: string;
                             } | null;
-                            if (!res.ok || !json?.ok || !json.data) {
+                            if (!res.ok || !json?.ok) {
                               toast.push({
                                 tone: "error",
                                 title: "Échec envoi de l’image",
-                                description: json?.message ?? "Réessayez ou vérifiez le format.",
+                                description: json?.message ?? json?.error ?? "Réessayez ou vérifiez le format.",
                               });
                               return;
                             }
-                            setMedia((x) => x.map((r) => (r.id === m.id ? json.data! : r)));
                             toast.push({ tone: "success", title: "Image mise à jour" });
                             await load();
                           } catch {
@@ -789,7 +794,7 @@ function MediaCreateForm({ disabled, onCreated }: { disabled: boolean; onCreated
       </div>
       <Button
         type="button"
-        disabled={disabled || busy || !title.trim() || !file || !IMAGE_TYPES.has(file.type)}
+        disabled={disabled || busy || !title.trim() || !file || !fileLooksLikeImage(file)}
         onClick={async () => {
           if (!file) return;
           setBusy(true);
@@ -803,12 +808,16 @@ function MediaCreateForm({ disabled, onCreated }: { disabled: boolean; onCreated
               body: fd,
               credentials: "include",
             });
-            const json = (await res.json().catch(() => null)) as { ok?: boolean; message?: string } | null;
+            const json = (await res.json().catch(() => null)) as {
+              ok?: boolean;
+              message?: string;
+              error?: string;
+            } | null;
             if (!res.ok || !json?.ok) {
               toast.push({
                 tone: "error",
                 title: "Échec envoi du média",
-                description: json?.message ?? "Réessayez ou vérifiez le format.",
+                description: json?.message ?? json?.error ?? "Réessayez ou vérifiez le format.",
               });
               return;
             }

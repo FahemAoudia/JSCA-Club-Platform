@@ -4,9 +4,9 @@ import { requireDashboardAdmin } from "@/lib/api-auth";
 import { db } from "@/lib/db";
 import {
   PUBLIC_IMAGE_MAX_BYTES,
-  PUBLIC_IMAGE_MIME,
   PUBLIC_IMAGE_VERCEL_INLINE_MAX_BYTES,
   publicImageExt,
+  resolveImageMime,
   writePublicUpload,
 } from "@/lib/public-image-upload";
 import { id } from "@/lib/utils";
@@ -36,12 +36,18 @@ export async function POST(request: Request) {
   const titleAr = typeof titleArRaw === "string" && titleArRaw.trim() ? titleArRaw.trim() : null;
 
   const blob = file as Blob;
-  const mime = blob.type || "application/octet-stream";
-  if (!PUBLIC_IMAGE_MIME.has(mime)) {
-    return NextResponse.json({ ok: false, error: "invalid_type" }, { status: 400 });
-  }
-
   const buf = Buffer.from(await blob.arrayBuffer());
+  const mime = resolveImageMime(blob.type || "", buf);
+  if (!mime) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "invalid_type",
+        message: "Format non reconnu. Utilisez JPG, PNG, WEBP ou GIF.",
+      },
+      { status: 400 },
+    );
+  }
   const maxBytes =
     process.env.VERCEL === "1" ? PUBLIC_IMAGE_VERCEL_INLINE_MAX_BYTES : PUBLIC_IMAGE_MAX_BYTES;
   if (buf.length > maxBytes) {
@@ -65,19 +71,38 @@ export async function POST(request: Request) {
   try {
     publicUrl = await writePublicUpload(SUBDIR, filename, buf, mime);
   } catch {
-    return NextResponse.json({ ok: false, error: "write_failed" }, { status: 500 });
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "write_failed",
+        message: "Impossible d’enregistrer le fichier image.",
+      },
+      { status: 500 },
+    );
   }
 
-  const created = await db.mediaItem.create({
-    data: {
-      id: nid,
-      title,
-      titleAr,
-      type: "photo",
-      src: publicUrl,
-      thumb: publicUrl,
-    },
-  });
+  try {
+    await db.mediaItem.create({
+      data: {
+        id: nid,
+        title,
+        titleAr,
+        type: "photo",
+        src: publicUrl,
+        thumb: publicUrl,
+      },
+    });
+  } catch (e) {
+    console.error("[media upload]", e);
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "db_create_failed",
+        message: "Enregistrement en base impossible. Réessayez ou réduisez la taille de l’image.",
+      },
+      { status: 500 },
+    );
+  }
 
-  return NextResponse.json({ ok: true, data: created });
+  return NextResponse.json({ ok: true, id: nid });
 }

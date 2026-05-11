@@ -4,9 +4,9 @@ import { requireDashboardAdmin } from "@/lib/api-auth";
 import { db } from "@/lib/db";
 import {
   PUBLIC_IMAGE_MAX_BYTES,
-  PUBLIC_IMAGE_MIME,
   PUBLIC_IMAGE_VERCEL_INLINE_MAX_BYTES,
   publicImageExt,
+  resolveImageMime,
   tryDeletePublicFile,
   writePublicUpload,
 } from "@/lib/public-image-upload";
@@ -29,12 +29,18 @@ export async function POST(request: Request) {
   }
 
   const blob = file as Blob;
-  const mime = blob.type || "application/octet-stream";
-  if (!PUBLIC_IMAGE_MIME.has(mime)) {
-    return NextResponse.json({ ok: false, error: "invalid_type" }, { status: 400 });
-  }
-
   const buf = Buffer.from(await blob.arrayBuffer());
+  const mime = resolveImageMime(blob.type || "", buf);
+  if (!mime) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "invalid_type",
+        message: "Format non reconnu. Utilisez JPG, PNG, WEBP ou GIF.",
+      },
+      { status: 400 },
+    );
+  }
   const maxBytes =
     process.env.VERCEL === "1" ? PUBLIC_IMAGE_VERCEL_INLINE_MAX_BYTES : PUBLIC_IMAGE_MAX_BYTES;
   if (buf.length > maxBytes) {
@@ -71,15 +77,34 @@ export async function POST(request: Request) {
   try {
     publicUrl = await writePublicUpload(SUBDIR, filename, buf, mime);
   } catch {
-    return NextResponse.json({ ok: false, error: "write_failed" }, { status: 500 });
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "write_failed",
+        message: "Impossible d’enregistrer le fichier image.",
+      },
+      { status: 500 },
+    );
   }
 
   await tryDeletePublicFile(row.logoUrl ?? undefined, PREFIX);
 
-  const updated = await db.landingPageSettings.update({
-    where: { id: "landing" },
-    data: { logoUrl: publicUrl },
-  });
+  try {
+    await db.landingPageSettings.update({
+      where: { id: "landing" },
+      data: { logoUrl: publicUrl },
+    });
+  } catch (e) {
+    console.error("[landing-logo]", e);
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "db_update_failed",
+        message: "Enregistrement du logo impossible. Réessayez ou réduisez la taille de l’image.",
+      },
+      { status: 500 },
+    );
+  }
 
-  return NextResponse.json({ ok: true, data: { logoUrl: updated.logoUrl } });
+  return NextResponse.json({ ok: true });
 }

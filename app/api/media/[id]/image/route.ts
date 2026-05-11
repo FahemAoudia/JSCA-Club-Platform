@@ -4,9 +4,9 @@ import { requireDashboardAdmin } from "@/lib/api-auth";
 import { db } from "@/lib/db";
 import {
   PUBLIC_IMAGE_MAX_BYTES,
-  PUBLIC_IMAGE_MIME,
   PUBLIC_IMAGE_VERCEL_INLINE_MAX_BYTES,
   publicImageExt,
+  resolveImageMime,
   tryDeletePublicFile,
   writePublicUpload,
 } from "@/lib/public-image-upload";
@@ -35,12 +35,18 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
   }
 
   const blob = file as Blob;
-  const mime = blob.type || "application/octet-stream";
-  if (!PUBLIC_IMAGE_MIME.has(mime)) {
-    return NextResponse.json({ ok: false, error: "invalid_type" }, { status: 400 });
-  }
-
   const buf = Buffer.from(await blob.arrayBuffer());
+  const mime = resolveImageMime(blob.type || "", buf);
+  if (!mime) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "invalid_type",
+        message: "Format non reconnu. Utilisez JPG, PNG, WEBP ou GIF.",
+      },
+      { status: 400 },
+    );
+  }
   const maxBytes =
     process.env.VERCEL === "1" ? PUBLIC_IMAGE_VERCEL_INLINE_MAX_BYTES : PUBLIC_IMAGE_MAX_BYTES;
   if (buf.length > maxBytes) {
@@ -63,7 +69,14 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
   try {
     publicUrl = await writePublicUpload(SUBDIR, filename, buf, mime);
   } catch {
-    return NextResponse.json({ ok: false, error: "write_failed" }, { status: 500 });
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "write_failed",
+        message: "Impossible d’enregistrer le fichier image.",
+      },
+      { status: 500 },
+    );
   }
 
   const oldSrc = existing.src;
@@ -71,14 +84,29 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
   await tryDeletePublicFile(oldSrc, PREFIX);
   if (oldThumb !== oldSrc) await tryDeletePublicFile(oldThumb, PREFIX);
 
-  const updated = await db.mediaItem.update({
-    where: { id },
-    data: {
-      src: publicUrl,
-      thumb: publicUrl,
-      type: "photo",
-    },
-  });
+  let updatedId: string;
+  try {
+    await db.mediaItem.update({
+      where: { id },
+      data: {
+        src: publicUrl,
+        thumb: publicUrl,
+        type: "photo",
+      },
+    });
+    updatedId = id;
+  } catch (e) {
+    console.error("[media image]", e);
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "db_update_failed",
+        message: "Enregistrement en base impossible. Réessayez ou réduisez la taille de l’image.",
+      },
+      { status: 500 },
+    );
+  }
 
-  return NextResponse.json({ ok: true, data: updated });
+  // Réponse légère : évite les payloads JSON énormes (data URL) côté Vercel.
+  return NextResponse.json({ ok: true, id: updatedId });
 }
