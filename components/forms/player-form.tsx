@@ -308,12 +308,9 @@ export function PlayerForm({
           </div>
           <div>
             <Label htmlFor="groupId">Groupe</Label>
-            <p className="text-[11px] text-muted-foreground">
-              Seuls les groupes de la <strong>branche</strong> et de la <strong>catégorie</strong> choisies sont listés.
-            </p>
             <select
               id="groupId"
-              className="mt-1 flex h-10 w-full rounded-lg border border-border bg-muted/40 px-3 text-sm"
+              className="flex h-10 w-full rounded-lg border border-border bg-muted/40 px-3 text-sm"
               value={form.groupId}
               onChange={(e) => set("groupId", e.target.value)}
             >
