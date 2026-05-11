@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 
 import { requireDashboardAdmin } from "@/lib/api-auth";
 import { db } from "@/lib/db";
@@ -97,11 +98,16 @@ export async function POST(request: Request) {
     });
   } catch (e) {
     console.error("[landing-logo]", e);
+    let message = "Enregistrement du logo impossible. Réessayez ou réduisez la taille de l’image.";
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2000") {
+      message =
+        "La base de données refuse le logo (colonne trop courte). Exécutez une fois `npx prisma db push` sur la base Neon production (schema Prisma avec @db.Text).";
+    }
     return NextResponse.json(
       {
         ok: false,
         error: "db_update_failed",
-        message: "Enregistrement du logo impossible. Réessayez ou réduisez la taille de l’image.",
+        message,
       },
       { status: 500 },
     );

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 
 import { requireDashboardAdmin } from "@/lib/api-auth";
 import { db } from "@/lib/db";
@@ -95,11 +96,16 @@ export async function POST(request: Request) {
     });
   } catch (e) {
     console.error("[media upload]", e);
+    let message = "Enregistrement en base impossible. Réessayez ou réduisez la taille de l’image.";
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2000") {
+      message =
+        "La base de données refuse l’image (colonne trop courte). Exécutez une fois `npx prisma db push` sur la base Neon production (schema Prisma avec @db.Text).";
+    }
     return NextResponse.json(
       {
         ok: false,
         error: "db_create_failed",
-        message: "Enregistrement en base impossible. Réessayez ou réduisez la taille de l’image.",
+        message,
       },
       { status: 500 },
     );
