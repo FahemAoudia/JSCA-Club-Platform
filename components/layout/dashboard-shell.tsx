@@ -34,8 +34,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -69,7 +67,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const allActivities = useJscaStore((s) => s.activities);
   const activities = React.useMemo(() => allActivities.slice(0, 6), [allActivities]);
-  const reset = useJscaStore((s) => s.resetMockData);
   const pushActivity = useJscaStore((s) => s.pushActivity);
 
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -253,8 +250,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-52">
-                  <DropdownMenuLabel>Prototype</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/">Retour au site public</Link>
                   </DropdownMenuItem>
@@ -269,23 +264,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                         (session navigateur sécurisée)
                       </span>
                     </a>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuRadioGroup
-                    defaultValue="fr"
-                    onValueChange={(v) => pushActivity("Langue UI", String(v))}
-                  >
-                    <DropdownMenuRadioItem value="fr">Français (actif)</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="ar-ar">
-                      العربية · RTL prévu (`dir`)
-                    </DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="text-red-700 focus:bg-red-600 focus:text-white dark:text-red-200"
-                    onSelect={() => reset()}
-                  >
-                    Réinitialiser les données exemple
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
