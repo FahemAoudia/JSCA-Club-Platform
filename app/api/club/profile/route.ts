@@ -20,11 +20,22 @@ export async function PUT(request: Request) {
   } | null;
   if (!body?.profile) return NextResponse.json({ ok: false, error: "invalid_request" }, { status: 400 });
 
+  const profile = {
+    id: "club",
+    name: body.profile.name ?? "JSCA",
+    address: body.profile.address ?? "",
+    phone: body.profile.phone ?? "",
+    email: body.profile.email ?? "",
+    fax: body.profile.fax ?? "",
+    headquarters: body.profile.headquarters ?? "",
+    vehicle: body.profile.vehicle ?? "",
+  } satisfies Prisma.ClubProfileUncheckedCreateInput;
+
   const updated = await db.$transaction(async (tx) => {
     await tx.clubProfile.upsert({
       where: { id: "club" },
-      create: { ...body.profile, id: "club" },
-      update: { ...body.profile, id: "club" },
+      create: profile,
+      update: profile,
       include: { bankAccounts: true },
     });
     if (body.bankAccounts) {

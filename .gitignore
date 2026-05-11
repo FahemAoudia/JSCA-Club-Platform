@@ -52,3 +52,5 @@ next-env.d.ts
 
 /public/uploads/club-coaches/*
 !/public/uploads/club-coaches/.gitkeep
+
+.vercel

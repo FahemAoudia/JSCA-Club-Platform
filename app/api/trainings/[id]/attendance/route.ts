@@ -32,8 +32,8 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     },
     create: {
       id: body.id ?? `${trainingId}_${body.playerId}`,
-      trainingId,
-      playerId: body.playerId,
+      training: { connect: { id: trainingId } },
+      player: { connect: { id: body.playerId } },
       status: body.status,
       markedAt,
     } satisfies Prisma.TrainingAttendanceCreateInput,
