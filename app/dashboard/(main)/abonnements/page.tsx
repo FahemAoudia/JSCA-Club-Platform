@@ -36,8 +36,8 @@ export default function AbonnementsPage() {
   const [open, setOpen] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [draft, setDraft] = React.useState<Omit<Subscription, "id">>({
-    playerId: players[0]?.id ?? "",
-    groupId: sportGroups[0]?.id ?? "",
+    playerId: "",
+    groupId: "",
     mode: "mensuel",
     paymentDate: new Date().toISOString().slice(0, 10),
     month: new Date().toISOString().slice(0, 7),
@@ -47,16 +47,30 @@ export default function AbonnementsPage() {
     sessionsRemaining: null,
   });
 
+  const playersInSelectedGroup = React.useMemo(
+    () => players.filter((p) => p.groupId === draft.groupId),
+    [players, draft.groupId],
+  );
+
   function ensureDefaults() {
-    setDraft((d) => ({
-      ...d,
-      playerId: d.playerId || players[0]?.id || "",
-      groupId: d.groupId || sportGroups[0]?.id || "",
-    }));
+    setDraft((d) => {
+      const groupId = d.groupId || sportGroups[0]?.id || "";
+      const list = players.filter((p) => p.groupId === groupId);
+      const playerId = list.some((p) => p.id === d.playerId) ? d.playerId : list[0]?.id ?? "";
+      return { ...d, groupId, playerId };
+    });
   }
 
   function save() {
     if (saving) return;
+    if (!draft.playerId || !draft.groupId) {
+      toast.push({
+        tone: "error",
+        title: "Sélection incomplète",
+        description: "Choisissez un groupe avec au moins un sportif.",
+      });
+      return;
+    }
     const dup = rows.some((r) => r.playerId === draft.playerId && r.month === draft.month && r.mode === draft.mode);
     if (dup) {
       toast.push({
@@ -98,33 +112,49 @@ export default function AbonnementsPage() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Créer un abonnement</DialogTitle>
-                <DialogDescription>Sélection joueur, groupe, mode de facturation.</DialogDescription>
+                <DialogDescription>
+                  Choisissez d’abord le <strong>groupe</strong> : seuls les sportifs inscrits dans ce groupe sont
+                  proposés.
+                </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Sportif">
-                  <select
-                    className="flex h-10 w-full rounded-lg border border-border bg-muted/40 px-3 text-sm"
-                    value={draft.playerId}
-                    onChange={(e) => setDraft({ ...draft, playerId: e.target.value })}
-                  >
-                    {players.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.lastName} {p.firstName}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
                 <Field label="Groupe">
                   <select
                     className="flex h-10 w-full rounded-lg border border-border bg-muted/40 px-3 text-sm"
                     value={draft.groupId}
-                    onChange={(e) => setDraft({ ...draft, groupId: e.target.value })}
+                    onChange={(e) => {
+                      const groupId = e.target.value;
+                      const list = players.filter((p) => p.groupId === groupId);
+                      setDraft({
+                        ...draft,
+                        groupId,
+                        playerId: list.some((p) => p.id === draft.playerId) ? draft.playerId : list[0]?.id ?? "",
+                      });
+                    }}
                   >
                     {sportGroups.map((g) => (
                       <option key={g.id} value={g.id}>
                         {g.name}
                       </option>
                     ))}
+                  </select>
+                </Field>
+                <Field label="Sportif">
+                  <select
+                    className="flex h-10 w-full rounded-lg border border-border bg-muted/40 px-3 text-sm"
+                    value={draft.playerId}
+                    onChange={(e) => setDraft({ ...draft, playerId: e.target.value })}
+                    disabled={!playersInSelectedGroup.length}
+                  >
+                    {playersInSelectedGroup.length === 0 ? (
+                      <option value="">Aucun sportif dans ce groupe</option>
+                    ) : (
+                      playersInSelectedGroup.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.lastName} {p.firstName}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </Field>
                 <Field label="Mode">
@@ -166,7 +196,7 @@ export default function AbonnementsPage() {
                 <Button variant="outline" type="button" onClick={() => setOpen(false)}>
                   Annuler
                 </Button>
-                <Button type="button" onClick={save}>
+                <Button type="button" onClick={save} disabled={!draft.playerId}>
                   {saving ? "Enregistrement…" : "Enregistrer"}
                 </Button>
               </div>

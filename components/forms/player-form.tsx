@@ -122,7 +122,18 @@ export function PlayerForm({
   const [photoPreviewUrl, setPhotoPreviewUrl] = React.useState<string | null>(null);
   const photoInputRef = React.useRef<HTMLInputElement>(null);
 
-  const groupsForBranch = sportGroups.filter((g) => g.branch === form.branch);
+  const groupsEligible = React.useMemo(
+    () => sportGroups.filter((g) => g.branch === form.branch && g.category === form.category),
+    [sportGroups, form.branch, form.category],
+  );
+
+  React.useEffect(() => {
+    setForm((f) => {
+      const eligible = sportGroups.filter((g) => g.branch === f.branch && g.category === f.category);
+      if (eligible.some((g) => g.id === f.groupId)) return f;
+      return { ...f, groupId: eligible[0]?.id ?? "" };
+    });
+  }, [form.branch, form.category, sportGroups]);
 
   React.useEffect(() => {
     if (!pendingPhoto) {
@@ -141,10 +152,10 @@ export function PlayerForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (saving) return;
-    if (!form.groupId && groupsForBranch[0]) {
-      setForm((f) => ({ ...f, groupId: groupsForBranch[0].id }));
+    if (!form.groupId && groupsEligible[0]) {
+      setForm((f) => ({ ...f, groupId: groupsEligible[0].id }));
     }
-    const groupId = form.groupId || groupsForBranch[0]?.id || "";
+    const groupId = form.groupId || groupsEligible[0]?.id || "";
 
     if (!playerId) {
       const key = `${normalizeKey(form.lastName)}|${normalizeKey(form.firstName)}|${form.birthDate}`;
@@ -297,14 +308,17 @@ export function PlayerForm({
           </div>
           <div>
             <Label htmlFor="groupId">Groupe</Label>
+            <p className="text-[11px] text-muted-foreground">
+              Seuls les groupes de la <strong>branche</strong> et de la <strong>catégorie</strong> choisies sont listés.
+            </p>
             <select
               id="groupId"
-              className="flex h-10 w-full rounded-lg border border-border bg-muted/40 px-3 text-sm"
+              className="mt-1 flex h-10 w-full rounded-lg border border-border bg-muted/40 px-3 text-sm"
               value={form.groupId}
               onChange={(e) => set("groupId", e.target.value)}
             >
               <option value="">Sélectionner…</option>
-              {groupsForBranch.map((g) => (
+              {groupsEligible.map((g) => (
                 <option key={g.id} value={g.id}>
                   {g.name}
                 </option>

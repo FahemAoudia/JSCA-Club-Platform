@@ -30,8 +30,8 @@ export default function PlayerMatchStatsPage() {
 
   const [open, setOpen] = React.useState(false);
   const [draft, setDraft] = React.useState<Omit<PlayerMatchStat, "id">>({
-    playerId: players[0]?.id ?? "",
-    matchId: matches[0]?.id ?? "",
+    playerId: "",
+    matchId: "",
     goals: 0,
     assists: 0,
     cardsYellow: 0,
@@ -40,15 +40,24 @@ export default function PlayerMatchStatsPage() {
     notes: "",
   });
 
+  const playersForMatch = React.useMemo(() => {
+    const m = matches.find((x) => x.id === draft.matchId);
+    if (!m) return players;
+    return players.filter((p) => p.category === m.category);
+  }, [players, matches, draft.matchId]);
+
   React.useEffect(() => {
-    setDraft((d) => ({
-      ...d,
-      playerId: d.playerId || players[0]?.id || "",
-      matchId: d.matchId || matches[0]?.id || "",
-    }));
+    setDraft((d) => {
+      const matchId = d.matchId || matches[0]?.id || "";
+      const m = matches.find((x) => x.id === matchId);
+      const list = m ? players.filter((p) => p.category === m.category) : players;
+      const playerId = list.some((p) => p.id === d.playerId) ? d.playerId : list[0]?.id ?? "";
+      return { ...d, matchId, playerId };
+    });
   }, [players, matches]);
 
   function persist() {
+    if (!draft.matchId || !draft.playerId) return;
     add(draft);
     setOpen(false);
   }
@@ -66,33 +75,50 @@ export default function PlayerMatchStatsPage() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Contribution sportive officielle sur un match</DialogTitle>
-                <DialogDescription>Buts · passes décisives · discipline · temps jeu.</DialogDescription>
+                <DialogDescription>
+                  Buts · passes décisives · discipline · temps jeu. La liste des sportifs correspond à la{" "}
+                  <strong>catégorie du match</strong> choisi.
+                </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 md:grid-cols-2">
-                <SelectField label="Sportif">
-                  <select
-                    className="flex h-10 w-full rounded-lg border border-border bg-muted/40 px-3 text-sm"
-                    value={draft.playerId}
-                    onChange={(e) => setDraft({ ...draft, playerId: e.target.value })}
-                  >
-                    {players.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.lastName}&nbsp;{p.firstName}
-                      </option>
-                    ))}
-                  </select>
-                </SelectField>
                 <SelectField label="Match officiel JSCA">
                   <select
                     className="flex h-10 w-full rounded-lg border border-border bg-muted/40 px-3 text-sm"
                     value={draft.matchId}
-                    onChange={(e) => setDraft({ ...draft, matchId: e.target.value })}
+                    onChange={(e) => {
+                      const matchId = e.target.value;
+                      const m = matches.find((x) => x.id === matchId);
+                      const list = m ? players.filter((p) => p.category === m.category) : players;
+                      setDraft({
+                        ...draft,
+                        matchId,
+                        playerId: list.some((p) => p.id === draft.playerId) ? draft.playerId : list[0]?.id ?? "",
+                      });
+                    }}
                   >
                     {matches.map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.homeTeam} · {new Date(m.date).toLocaleDateString("fr-FR")}
                       </option>
                     ))}
+                  </select>
+                </SelectField>
+                <SelectField label="Sportif">
+                  <select
+                    className="flex h-10 w-full rounded-lg border border-border bg-muted/40 px-3 text-sm"
+                    value={draft.playerId}
+                    onChange={(e) => setDraft({ ...draft, playerId: e.target.value })}
+                    disabled={!playersForMatch.length}
+                  >
+                    {playersForMatch.length === 0 ? (
+                      <option value="">Aucun sportif dans cette catégorie</option>
+                    ) : (
+                      playersForMatch.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.lastName}&nbsp;{p.firstName}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </SelectField>
                 <Field label="Buts marqués" type="number" value={draft.goals} onChange={(v) => setDraft({ ...draft, goals: v })} />
@@ -108,7 +134,7 @@ export default function PlayerMatchStatsPage() {
                 <Button variant="outline" type="button" onClick={() => setOpen(false)}>
                   Annuler
                 </Button>
-                <Button type="button" onClick={persist}>
+                <Button type="button" onClick={persist} disabled={!draft.matchId || !draft.playerId}>
                   Enregistrer
                 </Button>
               </div>
