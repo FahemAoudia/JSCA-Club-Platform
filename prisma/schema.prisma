@@ -1,0 +1,398 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Branch {
+  football
+}
+
+enum Category {
+  u9
+  u11
+  u13
+  u16
+  u18
+  u20
+  senior
+}
+
+enum TrainingStatus {
+  ouverte
+  fermee
+  annulee
+}
+
+enum PaymentStatus {
+  paye
+  partiel
+  impaye
+}
+
+enum SubscriptionMode {
+  mensuel
+  seances
+}
+
+enum StockMovementType {
+  reception
+  sortie
+}
+
+enum FinanceKind {
+  recette
+  depense
+}
+
+enum MatchCompetitionType {
+  championnat
+  coupe
+  tournoi
+}
+
+enum MatchStatus {
+  programme
+  en_cours
+  termine
+  reporte
+  annule
+}
+
+enum TrainingAttendanceStatus {
+  present
+  absent
+}
+
+enum MediaType {
+  photo
+  video
+}
+
+model ClubProfile {
+  id           String @id @default("club")
+  name         String
+  address      String
+  phone        String
+  email        String
+  fax          String
+  headquarters String
+  vehicle      String
+  bankAccounts BankAccount[]
+}
+
+model BankAccount {
+  id        String @id
+  label     String
+  bank      String
+  rib       String
+  clubId    String
+  club      ClubProfile @relation(fields: [clubId], references: [id], onDelete: Cascade)
+}
+
+model BoardMember {
+  id     String @id
+  fullName String
+  role   String
+  phone  String
+  email  String
+  since  String
+  active Boolean
+}
+
+model Adherent {
+  id           String @id
+  memberNumber String
+  lastName     String
+  firstName    String
+  phone        String
+  email        String
+  joinDate     String
+  active       Boolean
+}
+
+/// Encadrement technique : catégories encadrées, licence fédérale, diplôme.
+model ClubCoach {
+  id             String     @id
+  staffNumber    String
+  lastName       String
+  firstName      String
+  phone          String
+  email          String
+  joinDate       String
+  active         Boolean
+  licenseNumber  String?
+  diploma        String?
+  photoUrl       String?
+  categories     Category[]
+}
+
+model SportGroup {
+  id           String @id
+  name         String
+  branch       Branch
+  category     Category
+  coach        String
+  scheduleNote String
+
+  players   Player[]
+  trainings TrainingSession[]
+  subscriptions Subscription[]
+}
+
+model Player {
+  id             String @id
+  sportNumber    String
+  licenseNumber  String
+  lastName       String
+  firstName      String
+  fatherName     String
+  motherFullName String
+  birthWilaya    String
+  birthCommune   String
+  birthDate      String
+  joinDate       String
+  branch         Branch
+  groupId        String
+  category       Category
+  idCardNumber   String
+  bloodType      String
+  weightKg       Float
+  heightCm       Int
+  outfitSize     String
+  shoeSize       String
+  address        String
+  phoneLandline  String
+  phoneMobile    String
+  email          String
+  active         Boolean
+  photoUrl       String?
+
+  group          SportGroup @relation(fields: [groupId], references: [id])
+  subscriptions  Subscription[]
+  matchStats     PlayerMatchStat[]
+  attendance     TrainingAttendance[]
+
+  @@index([groupId])
+}
+
+model TrainingSession {
+  id       String @id
+  title    String
+  groupId  String
+  branch   Branch
+  startAt  String
+  endAt    String
+  location String
+  status   TrainingStatus
+  notes    String?
+
+  group    SportGroup @relation(fields: [groupId], references: [id])
+  attendance TrainingAttendance[]
+}
+
+model TrainingAttendance {
+  id         String @id
+  trainingId String
+  playerId   String
+  status     TrainingAttendanceStatus
+  markedAt   String
+
+  training   TrainingSession @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  player     Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([trainingId, playerId])
+  @@index([playerId])
+}
+
+model Subscription {
+  id              String @id
+  playerId        String
+  groupId         String
+  mode            SubscriptionMode
+  paymentDate     String
+  month           String
+  monthlyAmount   Float
+  amountPaid      Float
+  paymentStatus   PaymentStatus
+  sessionsRemaining Int?
+
+  player          Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  group           SportGroup @relation(fields: [groupId], references: [id])
+
+  @@index([playerId])
+  @@index([groupId])
+}
+
+model MatchRecord {
+  id        String @id
+  type      MatchCompetitionType
+  season    String
+  division  String
+  category  Category
+  date      String
+  venue     String
+  homeTeam  String
+  awayTeam  String
+  homeScore Int?
+  awayScore Int?
+  status    MatchStatus
+
+  playerStats PlayerMatchStat[]
+}
+
+model PlayerMatchStat {
+  id            String @id
+  playerId      String
+  matchId       String
+  goals         Int
+  assists       Int
+  cardsYellow   Int
+  cardsRed      Int
+  minutesPlayed Int
+  notes         String?
+
+  player        Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  match         MatchRecord @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@index([playerId])
+  @@index([matchId])
+}
+
+model StockItem {
+  id            String @id
+  name          String
+  quantity      Int
+  alertThreshold Int
+  unit          String
+
+  movements     StockMovement[]
+}
+
+model StockMovement {
+  id           String @id
+  productId    String
+  type         StockMovementType
+  quantity     Int
+  purchaseDate String?
+  source       String
+  beneficiary  String
+  note         String
+
+  product      StockItem @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model FinanceTransaction {
+  id        String @id
+  kind      FinanceKind
+  label     String
+  amount    Float
+  date      String
+  category  String
+  reference String
+}
+
+model Opponent {
+  id      String @id
+  name    String
+  city    String
+  contact String
+  phone   String
+}
+
+model CompetitionDivision {
+  id     String @id
+  label  String
+  season String
+  branch Branch
+}
+
+model CompetitionProgramEntry {
+  id       String @id
+  title    String
+  date     String
+  location String
+  phase    String
+  notes    String?
+}
+
+model SchoolLevel {
+  id    String @id
+  label String
+  order Int
+}
+
+model SchoolResult {
+  id    String @id
+  label String
+}
+
+model GeneralSettings {
+  id              String @id @default("settings")
+  clubShortName   String
+  defaultCurrency String
+  locale          String
+  futureLocale    String
+}
+
+model NewsItem {
+  id         String @id
+  title      String
+  titleAr    String?
+  excerpt    String
+  excerptAr  String?
+  date       String
+  category   String
+  categoryAr String?
+}
+
+model MediaItem {
+  id      String @id
+  title   String
+  titleAr String?
+  type    MediaType
+  src     String
+  thumb   String
+}
+
+/// Textes page d’accueil / actualités (FR+AR), logo et emoji d’en-tête — fusionnés avec les défauts code.
+model LandingPageSettings {
+  id            String   @id @default("landing")
+  copyFr        Json     @default("{}")
+  copyAr        Json     @default("{}")
+  actualitesFr  Json     @default("{}")
+  actualitesAr  Json     @default("{}")
+  logoUrl       String?
+  bannerEmoji   String?  @default("ⵣ")
+  updatedAt     DateTime @updatedAt
+}
+
+model ActivityEntry {
+  id     String @id
+  at     String
+  title  String
+  detail String?
+}
+
+model Role {
+  id          String @id
+  name        String
+  permissions String[]
+  users       AdminUser[]
+}
+
+model AdminUser {
+  id        String @id
+  name      String
+  email     String
+  roleId    String
+  active    Boolean
+  lastLogin String?
+
+  role      Role @relation(fields: [roleId], references: [id])
+}
+

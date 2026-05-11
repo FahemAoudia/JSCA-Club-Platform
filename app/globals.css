@@ -1,0 +1,233 @@
+@import "tailwindcss";
+
+/**
+ * Charte JSCA — dérivée du blason officiel (vert forêt, or, bleu institutionnel, rouge ᵣ symbole central)
+ */
+:root {
+  --jsca-green: oklch(0.44 0.1 142);
+  --jsca-green-deep: oklch(0.32 0.08 142);
+  --jsca-gold: oklch(0.9 0.16 96);
+  --jsca-gold-border: oklch(0.82 0.14 92);
+  --jsca-red: oklch(0.55 0.22 25);
+  --jsca-blue: oklch(0.34 0.12 264);
+  --jsca-blue-bright: oklch(0.45 0.14 264);
+  --jsca-nav-active: color-mix(in oklch, var(--jsca-gold) 24%, transparent);
+
+  --background: oklch(0.988 0.004 250);
+  --foreground: oklch(0.2 0.02 265);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.02 265);
+  --muted: oklch(0.955 0.012 250);
+  --muted-foreground: oklch(0.45 0.02 250);
+  --border: oklch(0.9 0.01 250);
+  /** Boutons principaux = vert blason */
+  --primary: var(--jsca-green);
+  --primary-foreground: oklch(0.99 0.01 100);
+  /** Accents secondaires = or */
+  --accent: var(--jsca-gold);
+  --accent-foreground: oklch(0.22 0.06 95);
+  --ring: var(--jsca-gold-border);
+  /** Barre latérale = vert profond */
+  --sidebar: var(--jsca-green-deep);
+  --sidebar-foreground: oklch(0.97 0.01 145);
+}
+
+.dark {
+  --jsca-green: oklch(0.52 0.11 145);
+  --jsca-green-deep: oklch(0.24 0.05 145);
+  --jsca-gold: oklch(0.88 0.14 92);
+  --jsca-gold-border: oklch(0.72 0.11 88);
+  --jsca-red: oklch(0.62 0.2 25);
+  --jsca-blue: oklch(0.72 0.1 264);
+  --jsca-blue-bright: oklch(0.78 0.1 264);
+  --jsca-nav-active: color-mix(in oklch, var(--jsca-gold) 22%, transparent);
+
+  --background: oklch(0.16 0.02 265);
+  --foreground: oklch(0.95 0.01 255);
+  --card: oklch(0.2 0.02 268);
+  --card-foreground: oklch(0.96 0.008 255);
+  --muted: oklch(0.26 0.02 268);
+  --muted-foreground: oklch(0.72 0.02 255);
+  --border: oklch(0.32 0.02 268);
+  --primary: var(--jsca-green);
+  --primary-foreground: oklch(0.99 0.01 100);
+  --accent: var(--jsca-gold);
+  --accent-foreground: oklch(0.2 0.05 95);
+  --ring: var(--jsca-gold-border);
+  --sidebar: oklch(0.2 0.04 145);
+  --sidebar-foreground: oklch(0.94 0.015 145);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-jsca-green: var(--jsca-green);
+  --color-jsca-gold: var(--jsca-gold);
+  --color-jsca-red: var(--jsca-red);
+  --color-jsca-blue: var(--jsca-blue);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: white;
+  }
+
+  /* Retirer paddings/max-width qui réduisent la zone imprimable */
+  main {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Neutraliser les wrappers "dashboard" qui coupent le rendu en impression */
+  .min-h-svh,
+  .h-svh,
+  .h-screen,
+  .min-h-screen,
+  .max-h-svh {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+  }
+
+  .overflow-hidden,
+  .overflow-auto,
+  .overflow-y-auto,
+  .overflow-x-auto,
+  [style*="overflow: hidden"],
+  [style*="overflow:hidden"] {
+    overflow: visible !important;
+  }
+
+  .sticky,
+  .fixed {
+    position: static !important;
+  }
+
+  /* Masquer tout le chrome UI du dashboard */
+  aside,
+  header,
+  nav {
+    display: none !important;
+  }
+
+  /* Imprimer uniquement la zone des cartes */
+  body * {
+    visibility: hidden !important;
+  }
+
+  .jsca-print-root,
+  .jsca-print-root * {
+    visibility: visible !important;
+  }
+
+  .jsca-print-root {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  /* Grille impression (même taille que "Une carte par page") */
+  .jsca-print-sheet {
+    display: grid;
+    width: 100% !important;
+    max-width: 100% !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8mm;
+    align-content: start;
+    justify-content: start;
+  }
+
+  /* En impression, "Plusieurs par page" = une sous l'autre (même taille) */
+  .jsca-print-sheet[data-layout="multi"] {
+    grid-template-columns: 1fr;
+  }
+
+  .jsca-print-sheet[data-layout="single"] {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .jsca-print-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    /* توحيد ارتفاع recto/verso: اجعل verso يطابق recto */
+    min-height: 82mm !important;
+    max-height: none !important;
+    overflow: visible !important;
+    /* Forcer un ratio identique recto/verso pour éviter tout décalage */
+    aspect-ratio: auto;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Neutraliser les "h-full" Tailwind qui enferment le contenu */
+  .jsca-print-root .h-full {
+    height: auto !important;
+  }
+
+  /* Réduire légèrement les paddings en impression pour éviter le dépassement */
+  .jsca-print-root .p-4 {
+    padding: 3mm !important;
+  }
+
+  .jsca-print-card[data-break="after"] {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  /* Support wrappers "data-break" (mode single / duplex) */
+  [data-break="after"] {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .jsca-print-hide {
+    display: none !important;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.55 0.06 145 / 0.45) transparent;
+  }
+}
