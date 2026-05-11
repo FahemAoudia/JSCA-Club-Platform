@@ -54,9 +54,9 @@ export default function PageAccueilSettingsPage() {
     setLoading(true);
     try {
       const [settingsRes, newsRes, mediaRes] = await Promise.all([
-        fetch("/api/landing-page-settings", { credentials: "include" }),
-        fetch("/api/news", { credentials: "include" }),
-        fetch("/api/media", { credentials: "include" }),
+        fetch("/api/landing-page-settings", { credentials: "include", cache: "no-store" }),
+        fetch("/api/news", { credentials: "include", cache: "no-store" }),
+        fetch("/api/media", { credentials: "include", cache: "no-store" }),
       ]);
       const settingsJson = (await settingsRes.json().catch(() => null)) as {
         ok?: boolean;
@@ -103,6 +103,7 @@ export default function PageAccueilSettingsPage() {
       const res = await fetch("/api/landing-page-settings", {
         method: "PATCH",
         credentials: "include",
+        cache: "no-store",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(patch),
       });
@@ -341,6 +342,7 @@ export default function PageAccueilSettingsPage() {
                           method: "POST",
                           body: fd,
                           credentials: "include",
+                          cache: "no-store",
                         });
                         const json = (await res.json().catch(() => null)) as {
                           ok?: boolean;
@@ -569,6 +571,7 @@ export default function PageAccueilSettingsPage() {
                               method: "POST",
                               body: fd,
                               credentials: "include",
+                              cache: "no-store",
                             });
                             const json = (await res.json().catch(() => null)) as {
                               ok?: boolean;
@@ -807,6 +810,7 @@ function MediaCreateForm({ disabled, onCreated }: { disabled: boolean; onCreated
               method: "POST",
               body: fd,
               credentials: "include",
+              cache: "no-store",
             });
             const json = (await res.json().catch(() => null)) as {
               ok?: boolean;

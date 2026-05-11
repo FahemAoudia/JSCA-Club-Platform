@@ -28,7 +28,8 @@ export async function GET(request: Request, ctx: { params: Promise<{ id: string 
       status: 200,
       headers: {
         "Content-Type": parsed.mime || "application/octet-stream",
-        "Cache-Control": "public, max-age=3600",
+        // Même URL après remplacement en base → éviter cache navigateur/CDN qui masque la 2e image.
+        "Cache-Control": "private, no-store, must-revalidate",
       },
     });
   }

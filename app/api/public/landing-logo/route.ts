@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     status: 200,
     headers: {
       "Content-Type": parsed.mime || "application/octet-stream",
-      "Cache-Control": "public, max-age=3600",
+      "Cache-Control": "private, no-store, must-revalidate",
     },
   });
 }

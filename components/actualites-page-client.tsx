@@ -21,7 +21,7 @@ export function ActualitesPageClient() {
   const [locale, setLocale] = React.useState<PublicLocale>("fr");
 
   React.useEffect(() => {
-    void fetch("/api/public/landing")
+    void fetch("/api/public/landing", { cache: "no-store" })
       .then((r) => r.json())
       .then((j: { ok?: boolean; data?: PublicLandingPayload }) => {
         if (j?.ok && j.data) setPayload(j.data);

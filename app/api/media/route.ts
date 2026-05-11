@@ -12,7 +12,10 @@ export async function GET() {
   if (guard) return guard;
   const rows = await db.mediaItem.findMany({ orderBy: { id: "asc" } });
   const data = rows.map((r) => mapMediaRowForJsonTransport(r));
-  return NextResponse.json({ ok: true, data });
+  return NextResponse.json(
+    { ok: true, data },
+    { headers: { "Cache-Control": "private, no-store, must-revalidate" } },
+  );
 }
 
 export async function POST(request: Request) {

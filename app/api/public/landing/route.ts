@@ -32,22 +32,25 @@ export async function GET() {
   const logoRaw = row?.logoUrl?.trim() || "/branding/jsca-logo.png";
   const logoUrl = mapLogoUrlForJsonTransport(logoRaw) ?? "/branding/jsca-logo.png";
 
-  return NextResponse.json({
-    ok: true,
-    data: {
-      copy,
-      actualites,
-      club: {
-        name: club.name,
-        address: club.address,
-        headquarters: club.headquarters,
-        phone: club.phone,
-        email: club.email,
+  return NextResponse.json(
+    {
+      ok: true,
+      data: {
+        copy,
+        actualites,
+        club: {
+          name: club.name,
+          address: club.address,
+          headquarters: club.headquarters,
+          phone: club.phone,
+          email: club.email,
+        },
+        news,
+        media: mediaOut,
+        logoUrl,
+        bannerEmoji: row?.bannerEmoji?.trim() || "ⵣ",
       },
-      news,
-      media: mediaOut,
-      logoUrl,
-      bannerEmoji: row?.bannerEmoji?.trim() || "ⵣ",
     },
-  });
+    { headers: { "Cache-Control": "private, no-store, must-revalidate" } },
+  );
 }
