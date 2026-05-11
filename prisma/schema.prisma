@@ -125,7 +125,7 @@ model ClubCoach {
   active         Boolean
   licenseNumber  String?
   diploma        String?
-  photoUrl       String?
+  photoUrl       String? @db.Text
   categories     Category[]
 }
 
@@ -168,7 +168,7 @@ model Player {
   phoneMobile    String
   email          String
   active         Boolean
-  photoUrl       String?
+  photoUrl       String? @db.Text
 
   group          SportGroup @relation(fields: [groupId], references: [id])
   subscriptions  Subscription[]
@@ -366,7 +366,7 @@ model LandingPageSettings {
   copyAr        Json     @default("{}")
   actualitesFr  Json     @default("{}")
   actualitesAr  Json     @default("{}")
-  logoUrl       String?
+  logoUrl       String? @db.Text
   bannerEmoji   String?  @default("ⵣ")
   updatedAt     DateTime @updatedAt
 }

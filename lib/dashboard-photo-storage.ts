@@ -1,6 +1,8 @@
 import { mkdir, unlink, writeFile } from "fs/promises";
 import { join } from "path";
 
+import { useVercelInlineImageStorage } from "@/lib/public-image-upload";
+
 /** Sur Vercel le FS du bundle est en lecture seule : pas de fichiers persistants dans `public/`. */
 const VERCEL_INLINE_MAX_BYTES = 1024 * 1024; // 1 Mo — suffisant pour une photo carte
 
@@ -38,7 +40,7 @@ export async function saveDashboardPhoto(args: {
 }): Promise<{ ok: true; publicUrl: string } | { ok: false; error: string; status: number }> {
   const { entityId, subdir, mime, buf, maxBytesOnDisk, existingUrl } = args;
 
-  if (process.env.VERCEL === "1") {
+  if (useVercelInlineImageStorage()) {
     if (buf.length > VERCEL_INLINE_MAX_BYTES) {
       return {
         ok: false,

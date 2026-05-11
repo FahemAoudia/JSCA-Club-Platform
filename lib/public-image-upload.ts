@@ -9,6 +9,17 @@ export const PUBLIC_IMAGE_MAX_BYTES = 4 * 1024 * 1024;
 /** Sur Vercel : pas de FS persistant — data URL en base (limite plus stricte). */
 export const PUBLIC_IMAGE_VERCEL_INLINE_MAX_BYTES = 1024 * 1024;
 
+/**
+ * Infra sans `public/` persistant (Vercel, preview, `vercel dev`).
+ * Ne pas se fier uniquement à `VERCEL=1` (certains runtimes ne l’exposent pas de la même façon).
+ */
+export function useVercelInlineImageStorage(): boolean {
+  if (process.env.VERCEL === "1") return true;
+  if (process.env.VERCEL_ENV) return true;
+  if (process.env.VERCEL_URL) return true;
+  return false;
+}
+
 export function publicImageExt(mime: string) {
   if (mime === "image/jpeg") return ".jpg";
   if (mime === "image/png") return ".png";
@@ -66,7 +77,7 @@ export async function writePublicUpload(
   buf: Buffer,
   mime = "image/jpeg",
 ): Promise<string> {
-  if (process.env.VERCEL === "1") {
+  if (useVercelInlineImageStorage()) {
     if (buf.length > PUBLIC_IMAGE_VERCEL_INLINE_MAX_BYTES) {
       throw new Error("too_large_vercel");
     }

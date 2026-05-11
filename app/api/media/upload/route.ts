@@ -7,6 +7,7 @@ import {
   PUBLIC_IMAGE_VERCEL_INLINE_MAX_BYTES,
   publicImageExt,
   resolveImageMime,
+  useVercelInlineImageStorage,
   writePublicUpload,
 } from "@/lib/public-image-upload";
 import { id } from "@/lib/utils";
@@ -48,17 +49,17 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const maxBytes =
-    process.env.VERCEL === "1" ? PUBLIC_IMAGE_VERCEL_INLINE_MAX_BYTES : PUBLIC_IMAGE_MAX_BYTES;
+  const maxBytes = useVercelInlineImageStorage()
+    ? PUBLIC_IMAGE_VERCEL_INLINE_MAX_BYTES
+    : PUBLIC_IMAGE_MAX_BYTES;
   if (buf.length > maxBytes) {
     return NextResponse.json(
       {
         ok: false,
         error: "too_large",
-        message:
-          process.env.VERCEL === "1"
-            ? "Image trop lourde pour Vercel (max 1 Mo). Compressez ou réduisez la taille."
-            : "Fichier trop volumineux (max 4 Mo).",
+        message: useVercelInlineImageStorage()
+          ? "Image trop lourde pour Vercel (max 1 Mo). Compressez ou réduisez la taille."
+          : "Fichier trop volumineux (max 4 Mo).",
       },
       { status: 413 },
     );
