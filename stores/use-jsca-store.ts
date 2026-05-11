@@ -216,7 +216,10 @@ export const useJscaStore = create<JscaState & JscaActions>((set, get) => ({
         ok?: boolean;
         data?: Record<string, unknown>;
       } | null;
-      if (!res.ok || !json?.ok || !json.data) return;
+      if (!res.ok || !json?.ok || !json.data) {
+        console.warn("[JSCA] bootstrap failed", res.status, json);
+        return;
+      }
       const d = json.data as Partial<JscaState> & { club?: unknown };
 
       // Auto seed migration (one-time, idempotent) to avoid showing "0" everywhere on a fresh DB.
@@ -310,6 +313,9 @@ export const useJscaStore = create<JscaState & JscaActions>((set, get) => ({
       }));
     } catch {
       // ignore
+    } finally {
+      // Toujours sortir de l’écran « Chargement… » même si l’API échoue (ex. mauvaise variable DB sur Vercel).
+      set((s) => ({ ...s, hydrated: true }));
     }
   },
 

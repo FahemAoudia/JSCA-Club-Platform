@@ -3,7 +3,7 @@
 ## Prérequis
 - Node.js >= 18.17
 - Un mot de passe admin (variable `ADMIN_PASSWORD`)
-- Une base Vercel Postgres (variable `POSTGRES_URL`)
+- Une base PostgreSQL (variable **`POSTGRES_URL`** ou **`DATABASE_URL`** — Neon utilise souvent `DATABASE_URL`)
 
 ## Variables d’environnement
 Créer un fichier `.env` (ou configurer sur Vercel):
@@ -11,9 +11,11 @@ Créer un fichier `.env` (ou configurer sur Vercel):
 ```bash
 ADMIN_PASSWORD=...
 POSTGRES_URL=postgresql://...
+# ou
+DATABASE_URL=postgresql://...
 ```
 
-> En production Vercel: `POSTGRES_URL` est fourni par l’intégration **Vercel Postgres**.
+> En production Vercel: **Vercel Postgres** fournit souvent `POSTGRES_URL` ; **Neon** fournit souvent `DATABASE_URL`. L’application lit les deux.
 
 ## Installation
 

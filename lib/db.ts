@@ -6,10 +6,16 @@ declare global {
   var __prisma: PrismaClient | undefined;
 }
 
-function createAdapter() {
-  const connectionString =
+function connectionStringFromEnv(): string {
+  return (
     process.env.POSTGRES_URL ??
-    "postgresql://postgres:postgres@localhost:5432/jsca?schema=public";
+    process.env.DATABASE_URL ??
+    "postgresql://postgres:postgres@localhost:5432/jsca?schema=public"
+  );
+}
+
+function createAdapter() {
+  const connectionString = connectionStringFromEnv();
   const pool = new Pool({ connectionString });
   return new PrismaPg(pool);
 }
