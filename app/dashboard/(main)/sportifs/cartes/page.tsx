@@ -112,7 +112,7 @@ function PlayerCardsFrontPrintPage() {
             <Card
               key={p.id}
               className={cn(
-                "jsca-print-card relative overflow-hidden print:overflow-visible border-2 shadow-lg print:shadow-none",
+                "jsca-print-card relative overflow-hidden text-neutral-900 print:overflow-visible border-2 shadow-lg print:shadow-none",
                 t.cardFace,
                 t.cardBorder,
               )}
@@ -139,27 +139,27 @@ function PlayerCardsFrontPrintPage() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={p.photoUrl} alt="" className={L.photoImg} />
                       ) : (
-                        <div className={cn(L.photoImg, "flex items-center justify-center text-neutral-600 dark:text-muted-foreground")}>
+                        <div className={cn(L.photoImg, "flex items-center justify-center text-neutral-600")}>
                           Photo
                         </div>
                       )}
                     </div>
 
-                    <div className={cn(L.jscaBar, "font-semibold text-neutral-700 dark:text-muted-foreground", t.jscaBar)}>JSCA · 1986</div>
+                    <div className={cn(L.jscaBar, "font-semibold text-neutral-700", t.jscaBar)}>JSCA · 1986</div>
                   </div>
 
                   <div className="flex min-w-0 flex-1 flex-col justify-between min-h-0">
                     <div className="flex items-start gap-1.5">
                       <div className="min-w-0 flex-1 space-y-0.5">
-                        <p className={cn(L.kicker, "font-semibold uppercase text-neutral-600 dark:text-muted-foreground")}>
+                        <p className={cn(L.kicker, "font-semibold uppercase text-neutral-600")}>
                           LICENCE CLUB JSCA
                         </p>
-                        <p className={cn(L.name, "truncate text-neutral-950 dark:text-foreground")}>
+                        <p className={cn(L.name, "truncate text-neutral-950")}>
                           {p.lastName.toUpperCase()} {p.firstName}
                         </p>
-                        <p className={cn(L.meta, "text-neutral-600 dark:text-muted-foreground")}>
+                        <p className={cn(L.meta, "text-neutral-600")}>
                           Licence{" "}
-                          <span className="font-semibold text-neutral-900 dark:text-foreground">{p.licenseNumber?.trim() || "—"}</span>
+                          <span className="font-semibold text-neutral-900">{p.licenseNumber?.trim() || "—"}</span>
                         </p>
                       </div>
                       <Image
@@ -172,27 +172,27 @@ function PlayerCardsFrontPrintPage() {
                       />
                     </div>
 
-                    <div className={cn(L.fields, "text-neutral-900 dark:text-inherit")}>
+                    <div className={cn(L.fields, "text-neutral-900")}>
                       <p className="truncate">
-                        <span className="text-neutral-600 dark:text-muted-foreground">Section</span> · {p.branch}
+                        <span className="text-neutral-600">Section</span> · {p.branch}
                       </p>
                       <p className="truncate">
-                        <span className="text-neutral-600 dark:text-muted-foreground">Catégorie</span> ·{" "}
+                        <span className="text-neutral-600">Catégorie</span> ·{" "}
                         <span className={cn(t.categoryValue)}>{p.category.toUpperCase()}</span>
                       </p>
                       <p className="truncate">
-                        <span className="text-neutral-600 dark:text-muted-foreground">Date de naissance</span> ·{" "}
+                        <span className="text-neutral-600">Date de naissance</span> ·{" "}
                         {new Date(p.birthDate).toLocaleDateString("fr-FR")}
                       </p>
                       <p className="truncate">
-                        <span className="text-neutral-600 dark:text-muted-foreground">Lieu de naissance</span> ·{" "}
+                        <span className="text-neutral-600">Lieu de naissance</span> ·{" "}
                         {p.birthCommune?.trim() || "—"}
                       </p>
                       <p className="truncate">
-                        <span className="text-neutral-600 dark:text-muted-foreground">Groupage</span> · {p.bloodType?.trim() || "—"}
+                        <span className="text-neutral-600">Groupage</span> · {p.bloodType?.trim() || "—"}
                       </p>
                       <p className="truncate">
-                        <span className="text-neutral-600 dark:text-muted-foreground">Identité</span> · {p.idCardNumber || "—"}
+                        <span className="text-neutral-600">Identité</span> · {p.idCardNumber || "—"}
                       </p>
                     </div>
 

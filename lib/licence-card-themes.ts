@@ -155,7 +155,7 @@ function playerFull(cat: Category): PlayerLicenceFullTheme {
         badgeSeason: playerSeasonBadge("border-l-4 border-teal-500"),
         badgeOfficial: PLAYER_BADGE_OFFICIAL,
         contactStrip:
-          "border-dashed border-teal-800/32 bg-white/65 text-neutral-900 dark:bg-slate-900/55 dark:text-slate-100",
+          "border-dashed border-teal-800/32 bg-white/65 text-neutral-900",
         categoryValue: `${catVal} border-yellow-400/85 bg-gradient-to-r from-teal-600 via-emerald-700 to-teal-800 text-yellow-50 dark:border-yellow-300/55 dark:text-yellow-100 print:border-yellow-600`,
       },
       verso: versoAccent(
@@ -189,7 +189,7 @@ function playerFull(cat: Category): PlayerLicenceFullTheme {
         badgeSeason: playerSeasonBadge("border-l-4 border-amber-500"),
         badgeOfficial: PLAYER_BADGE_OFFICIAL,
         contactStrip:
-          "border-dashed border-amber-700/30 bg-white/70 text-neutral-900 dark:bg-slate-900/55 dark:text-slate-100",
+          "border-dashed border-amber-700/30 bg-white/70 text-neutral-900",
         categoryValue: `${catVal} border-lime-400/85 bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 text-yellow-50 dark:border-lime-300/55 dark:text-yellow-100 print:border-lime-600`,
       },
       verso: versoAccent(
@@ -223,7 +223,7 @@ function playerFull(cat: Category): PlayerLicenceFullTheme {
         badgeSeason: playerSeasonBadge("border-l-4 border-emerald-600"),
         badgeOfficial: PLAYER_BADGE_OFFICIAL,
         contactStrip:
-          "border-dashed border-emerald-900/28 bg-white/70 text-neutral-900 dark:bg-slate-900/55 dark:text-slate-100",
+          "border-dashed border-emerald-900/28 bg-white/70 text-neutral-900",
         categoryValue: `${catVal} border-yellow-400/85 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 text-yellow-50 dark:border-yellow-300/55 dark:text-yellow-100 print:border-yellow-600`,
       },
       verso: versoAccent(
@@ -258,7 +258,7 @@ function playerFull(cat: Category): PlayerLicenceFullTheme {
         badgeSeason: playerSeasonBadge("border-l-4 border-green-800"),
         badgeOfficial: PLAYER_BADGE_OFFICIAL,
         contactStrip:
-          "border-dashed border-green-900/24 bg-white/72 text-neutral-900 dark:bg-slate-900/55 dark:text-slate-100",
+          "border-dashed border-green-900/24 bg-white/72 text-neutral-900",
         categoryValue: `${catVal} border-green-500/80 bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white dark:border-green-400/55 dark:text-white print:border-green-700`,
       },
       verso: versoAccent(
@@ -292,7 +292,7 @@ function playerFull(cat: Category): PlayerLicenceFullTheme {
         badgeSeason: playerSeasonBadge("border-l-4 border-red-600"),
         badgeOfficial: PLAYER_BADGE_OFFICIAL,
         contactStrip:
-          "border-dashed border-red-900/28 bg-white/70 text-neutral-900 dark:bg-slate-900/55 dark:text-slate-100",
+          "border-dashed border-red-900/28 bg-white/70 text-neutral-900",
         categoryValue: `${catVal} border-yellow-400/85 bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-yellow-50 dark:border-yellow-300/55 dark:text-yellow-100 print:border-yellow-600`,
       },
       verso: versoAccent(
@@ -326,7 +326,7 @@ function playerFull(cat: Category): PlayerLicenceFullTheme {
         badgeSeason: playerSeasonBadge("border-l-4 border-emerald-600"),
         badgeOfficial: PLAYER_BADGE_OFFICIAL,
         contactStrip:
-          "border-dashed border-emerald-900/28 bg-white/70 text-neutral-900 dark:bg-slate-900/55 dark:text-slate-100",
+          "border-dashed border-emerald-900/28 bg-white/70 text-neutral-900",
         categoryValue: `${catVal} border-yellow-400/85 bg-gradient-to-r from-emerald-600 via-amber-600 to-emerald-800 text-yellow-50 dark:border-yellow-300/55 dark:text-yellow-100 print:border-yellow-600`,
       },
       verso: versoAccent(
@@ -359,7 +359,7 @@ function playerFull(cat: Category): PlayerLicenceFullTheme {
         badgeSeason: playerSeasonBadge("border-l-4 border-l-emerald-800"),
         badgeOfficial: PLAYER_BADGE_OFFICIAL,
         contactStrip:
-          "border-dashed border-stone-700/32 bg-white/65 text-neutral-900 dark:bg-slate-900/55 dark:text-slate-100",
+          "border-dashed border-stone-700/32 bg-white/65 text-neutral-900",
         categoryValue: `${catVal} border-amber-500/90 bg-gradient-to-r from-emerald-900 via-stone-800 to-emerald-950 text-amber-100 dark:border-amber-400/55 dark:text-amber-50 print:border-amber-700`,
       },
       verso: versoAccent(
