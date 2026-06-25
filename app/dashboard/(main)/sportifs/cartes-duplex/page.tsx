@@ -2,10 +2,13 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
 import QRCode from "react-qr-code";
 
 import { PageHeader } from "@/components/dashboard/page-header";
+import {
+  filterPlayersByName,
+  PlayerCardNameFilter,
+} from "@/components/dashboard/player-card-name-filter";
 import { Card, CardContent } from "@/components/ui/card";
 import { useJscaStore } from "@/stores/use-jsca-store";
 import { CLUB_CONTACT } from "@/lib/constants";
@@ -222,8 +225,7 @@ function VersoCard({
 
 function CartesDuplexPrintPage() {
   const players = useJscaStore((s) => s.players);
-  const search = useSearchParams();
-  const selectedId = search.get("id");
+  const [nameFilter, setNameFilter] = React.useState("");
 
   const active = React.useMemo(
     () =>
@@ -235,10 +237,7 @@ function CartesDuplexPrintPage() {
   );
 
   const sportNumbers = React.useMemo(() => computeAutoSportNumbers(active), [active]);
-  const rows = React.useMemo(
-    () => (selectedId ? active.filter((p) => p.id === selectedId) : active),
-    [active, selectedId],
-  );
+  const rows = React.useMemo(() => filterPlayersByName(active, nameFilter), [active, nameFilter]);
 
   const [mode, setMode] = React.useState<Mode>("duplex");
   const [layout, setLayout] = React.useState<Layout>("multi");
@@ -249,28 +248,14 @@ function CartesDuplexPrintPage() {
     <div className="space-y-8 jsca-print-root">
       <PageHeader
         title="Cartes sportives — impression recto/verso"
-        description={`Recto, verso, ou recto+verso (duplex) · ${rows.length} carte(s)`}
+        description={
+          nameFilter.trim()
+            ? `Recto, verso, ou recto+verso (duplex) · ${rows.length} / ${active.length} carte(s) · filtre « ${nameFilter.trim()} »`
+            : `Recto, verso, ou recto+verso (duplex) · ${rows.length} carte(s)`
+        }
         actions={
           <div className="flex flex-wrap items-center gap-2 print:hidden">
-            <select
-              className="h-9 rounded-lg border border-border bg-card px-3 text-sm"
-              value={selectedId ?? ""}
-              onChange={(e) => {
-                const id = e.target.value;
-                const url = new URL(window.location.href);
-                if (id) url.searchParams.set("id", id);
-                else url.searchParams.delete("id");
-                window.history.replaceState(null, "", url.toString());
-              }}
-            >
-              <option value="">Toutes les cartes</option>
-              {active.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.lastName} {p.firstName}
-                </option>
-              ))}
-            </select>
-
+            <PlayerCardNameFilter value={nameFilter} onChange={setNameFilter} />
             <select
               className="h-9 rounded-lg border border-border bg-card px-3 text-sm"
               value={mode}
@@ -345,15 +330,5 @@ function CartesDuplexPrintPage() {
 }
 
 export default function CartesDuplexPrintPageWrapper() {
-  return (
-    <React.Suspense
-      fallback={
-        <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
-          Chargement des cartes…
-        </div>
-      }
-    >
-      <CartesDuplexPrintPage />
-    </React.Suspense>
-  );
+  return <CartesDuplexPrintPage />;
 }

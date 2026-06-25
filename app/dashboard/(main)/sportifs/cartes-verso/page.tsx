@@ -2,10 +2,13 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
 import QRCode from "react-qr-code";
 
 import { PageHeader } from "@/components/dashboard/page-header";
+import {
+  filterPlayersByName,
+  PlayerCardNameFilter,
+} from "@/components/dashboard/player-card-name-filter";
 import { Card, CardContent } from "@/components/ui/card";
 import { getPlayerLicenceTheme } from "@/lib/licence-card-themes";
 import { licenceCardClasses as L } from "@/lib/licence-card-layout";
@@ -40,8 +43,7 @@ function computeAutoSportNumbers<T extends { id: string; sportNumber: string }>(
 
 function PlayerCardsBackPrintPage() {
   const players = useJscaStore((s) => s.players);
-  const search = useSearchParams();
-  const selectedId = search.get("id");
+  const [nameFilter, setNameFilter] = React.useState("");
 
   const active = React.useMemo(
     () =>
@@ -53,10 +55,7 @@ function PlayerCardsBackPrintPage() {
   );
 
   const sportNumbers = React.useMemo(() => computeAutoSportNumbers(active), [active]);
-  const rows = React.useMemo(
-    () => (selectedId ? active.filter((p) => p.id === selectedId) : active),
-    [active, selectedId],
-  );
+  const rows = React.useMemo(() => filterPlayersByName(active, nameFilter), [active, nameFilter]);
 
   const [layout, setLayout] = React.useState<"multi" | "single">("multi");
 
@@ -64,27 +63,14 @@ function PlayerCardsBackPrintPage() {
     <div className="space-y-8 jsca-print-root">
       <PageHeader
         title="Cartes sportives — verso"
-        description="Zone QR / signatures / mentions légales — modèle prêt pour design print."
+        description={
+          nameFilter.trim()
+            ? `Zone QR / signatures · ${rows.length} / ${active.length} carte(s) · filtre « ${nameFilter.trim()} »`
+            : "Zone QR / signatures / mentions légales — modèle prêt pour design print."
+        }
         actions={
           <div className="flex flex-wrap items-center gap-2 print:hidden">
-            <select
-              className="h-9 rounded-lg border border-border bg-card px-3 text-sm"
-              value={selectedId ?? ""}
-              onChange={(e) => {
-                const id = e.target.value;
-                const url = new URL(window.location.href);
-                if (id) url.searchParams.set("id", id);
-                else url.searchParams.delete("id");
-                window.history.replaceState(null, "", url.toString());
-              }}
-            >
-              <option value="">Toutes les cartes</option>
-              {active.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.lastName} {p.firstName}
-                </option>
-              ))}
-            </select>
+            <PlayerCardNameFilter value={nameFilter} onChange={setNameFilter} />
             <select
               className="h-9 rounded-lg border border-border bg-card px-3 text-sm"
               value={layout}
@@ -185,15 +171,5 @@ function PlayerCardsBackPrintPage() {
 }
 
 export default function PlayerCardsBackPrintPageWrapper() {
-  return (
-    <React.Suspense
-      fallback={
-        <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted-foreground">
-          Chargement des cartes…
-        </div>
-      }
-    >
-      <PlayerCardsBackPrintPage />
-    </React.Suspense>
-  );
+  return <PlayerCardsBackPrintPage />;
 }
