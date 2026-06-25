@@ -87,6 +87,224 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
+/* ——— Cartes licence JSCA (ID-1 biométrique ≈ 85,6 × 54 mm) ——— */
+:root {
+  --jsca-card-w: 85.6mm;
+  --jsca-card-h: 53.98mm;
+}
+
+.jsca-print-sheet {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4mm;
+  align-content: flex-start;
+}
+
+.jsca-print-card {
+  box-sizing: border-box;
+  width: var(--jsca-card-w) !important;
+  max-width: var(--jsca-card-w) !important;
+  height: var(--jsca-card-h) !important;
+  min-height: var(--jsca-card-h) !important;
+  max-height: var(--jsca-card-h) !important;
+  overflow: hidden !important;
+  flex-shrink: 0;
+  font-size: 5.25pt;
+  line-height: 1.15;
+}
+
+.jsca-card-content {
+  position: relative;
+  height: 100% !important;
+  padding: 1.4mm !important;
+  box-sizing: border-box;
+}
+
+.jsca-card-body {
+  display: flex;
+  height: 100%;
+  gap: 1.5mm;
+  min-height: 0;
+}
+
+.jsca-card-sidebar {
+  display: flex;
+  width: 21mm !important;
+  flex-shrink: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 1.5mm;
+  border-width: 1px;
+  border-style: solid;
+  padding: 1mm !important;
+  min-height: 0;
+}
+
+.jsca-card-logo {
+  height: 4.5mm !important;
+  width: 4.5mm !important;
+}
+
+.jsca-card-number {
+  font-size: 5pt !important;
+  padding: 0.3mm 0.8mm !important;
+  border-radius: 1mm !important;
+  line-height: 1.1;
+}
+
+.jsca-card-photo-slot {
+  margin-top: 0.5mm;
+  overflow: hidden;
+  border-radius: 1mm;
+  min-height: 0;
+}
+
+.jsca-card-photo {
+  display: block;
+  height: 23mm !important;
+  width: 100% !important;
+  object-fit: cover;
+}
+
+.jsca-card-jsca-bar {
+  margin-top: 0.5mm;
+  padding: 0.4mm 0.6mm !important;
+  font-size: 4.5pt !important;
+  border-radius: 1mm;
+  line-height: 1.1;
+}
+
+.jsca-card-emblem {
+  height: 10.5mm !important;
+  width: 10.5mm !important;
+  flex-shrink: 0;
+}
+
+.jsca-card-kicker {
+  font-size: 4.25pt !important;
+  letter-spacing: 0.14em;
+  line-height: 1.1;
+}
+
+.jsca-card-name {
+  font-size: 6.75pt !important;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.jsca-card-meta {
+  font-size: 5pt !important;
+  line-height: 1.1;
+}
+
+.jsca-card-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 1.5mm;
+  row-gap: 0.35mm;
+  margin-top: 0.5mm;
+  font-size: 4.75pt !important;
+  line-height: 1.1;
+}
+
+.jsca-card-fields > p {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jsca-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5mm;
+  margin-top: 0.5mm;
+}
+
+.jsca-card-badges > * {
+  font-size: 4.25pt !important;
+  padding: 0.2mm 0.8mm !important;
+  line-height: 1.1;
+}
+
+.jsca-card-strip {
+  margin-top: 0.5mm;
+  padding: 0.5mm 0.8mm !important;
+  font-size: 4pt !important;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 1mm;
+}
+
+/* Verso */
+.jsca-card-verso-body {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 0;
+  font-size: 5pt;
+}
+
+.jsca-card-verso-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1mm;
+  padding-bottom: 0.5mm;
+}
+
+.jsca-card-verso-header .jsca-card-logo {
+  height: 4mm !important;
+  width: 4mm !important;
+}
+
+.jsca-card-qr {
+  display: flex;
+  height: 15mm !important;
+  width: 15mm !important;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1mm;
+  padding: 0.5mm !important;
+}
+
+.jsca-card-qr svg {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.jsca-card-notice {
+  margin-top: 0.5mm;
+  padding: 0.6mm !important;
+  font-size: 4.25pt !important;
+  line-height: 1.12;
+  border-radius: 1mm;
+}
+
+.jsca-card-signatures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5mm;
+  margin-top: 0.5mm;
+  font-size: 4pt !important;
+  line-height: 1.1;
+}
+
+.jsca-card-signatures > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5mm;
+}
+
+.jsca-card-signatures .h-px {
+  margin-top: auto;
+}
+
 @media print {
   @page {
     size: A4 portrait;
@@ -164,36 +382,33 @@ body {
     display: block !important;
   }
 
-  /* Grille impression (même taille que "Une carte par page") */
+  /* Grille impression — 2 cartes ID-1 par ligne sur A4 */
   .jsca-print-sheet {
-    display: grid;
-    width: 100% !important;
-    max-width: 100% !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8mm;
+    display: grid !important;
+    width: auto !important;
+    max-width: none !important;
+    grid-template-columns: repeat(2, var(--jsca-card-w));
+    gap: 4mm;
     align-content: start;
     justify-content: start;
   }
 
-  /* En impression, "Plusieurs par page" = une sous l'autre (même taille) */
   .jsca-print-sheet[data-layout="multi"] {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, var(--jsca-card-w));
   }
 
   .jsca-print-sheet[data-layout="single"] {
-    grid-template-columns: 1fr;
+    grid-template-columns: var(--jsca-card-w);
     gap: 0;
   }
 
   .jsca-print-card {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    /* توحيد ارتفاع recto/verso: اجعل verso يطابق recto */
-    min-height: 82mm !important;
-    max-height: none !important;
-    overflow: visible !important;
-    /* Forcer un ratio identique recto/verso pour éviter tout décalage */
+    width: var(--jsca-card-w) !important;
+    max-width: var(--jsca-card-w) !important;
+    height: var(--jsca-card-h) !important;
+    min-height: var(--jsca-card-h) !important;
+    max-height: var(--jsca-card-h) !important;
+    overflow: hidden !important;
     aspect-ratio: auto;
     break-inside: avoid;
     page-break-inside: avoid;

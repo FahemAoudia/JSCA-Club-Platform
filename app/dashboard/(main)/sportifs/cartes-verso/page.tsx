@@ -8,6 +8,7 @@ import QRCode from "react-qr-code";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { getPlayerLicenceTheme } from "@/lib/licence-card-themes";
+import { licenceCardClasses as L } from "@/lib/licence-card-layout";
 import { cn } from "@/lib/utils";
 import { useJscaStore } from "@/stores/use-jsca-store";
 
@@ -103,10 +104,7 @@ function PlayerCardsBackPrintPage() {
         }
       />
 
-      <div
-        className="jsca-print-sheet grid gap-8 md:grid-cols-2 print:grid-cols-2 print:gap-0"
-        data-layout={layout}
-      >
+      <div className={L.sheet} data-layout={layout}>
         {rows.map((p) => {
           const sportNumber = sportNumbers.get(p.id) ?? p.sportNumber ?? "";
           const v = getPlayerLicenceTheme(p.category).verso;
@@ -124,36 +122,29 @@ function PlayerCardsBackPrintPage() {
               )}
               data-break={layout === "single" ? "after" : undefined}
             >
-              <CardContent className="relative h-full print:h-auto p-4 text-sm">
-                <div className="flex h-full print:h-auto flex-col justify-between">
-                  <div className={cn("flex items-start justify-between gap-3 pb-2", v.headerRule)}>
+              <CardContent className={cn("relative", L.content)}>
+                <div className={L.versoBody}>
+                  <div className={cn(L.versoHeader, v.headerRule)}>
                     <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <Image src="/jsca-logo.svg" alt="JSCA" width={30} height={30} className="h-7 w-7" priority />
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Image src="/jsca-logo.svg" alt="JSCA" width={30} height={30} className={L.logo} priority />
+                        <div className="min-w-0">
+                          <p className={cn(L.kicker, "font-semibold uppercase text-muted-foreground")}>
                             Verso administratif
                           </p>
-                          <p className="truncate text-sm font-semibold">
+                          <p className={cn(L.name, "truncate")}>
                             {p.lastName} {p.firstName} · N° {sportNumber || "—"}
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-start">
-                      <div
-                        className={cn(
-                          "flex h-[26mm] w-[26mm] items-center justify-center rounded-xl border border-dashed p-1",
-                          v.qrFrame,
-                        )}
-                      >
-                        <QRCode value={qrValue} size={96} className="h-full w-full" />
-                      </div>
+                    <div className={cn(L.qr, "border border-dashed", v.qrFrame)}>
+                      <QRCode value={qrValue} size={64} />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 pt-2 text-[11px]">
+                  <div className={L.fields}>
                     <p className="col-span-2 truncate">
                       <span className="text-muted-foreground">Adresse :</span> {p.address || "—"}
                     </p>
@@ -169,22 +160,17 @@ function PlayerCardsBackPrintPage() {
                     </p>
                   </div>
 
-                  <div
-                    className={cn(
-                      "mt-2 rounded-xl border border-transparent p-2 text-[10px] leading-snug text-muted-foreground",
-                      v.noticeBg,
-                    )}
-                  >
+                  <div className={cn(L.notice, "border border-transparent text-muted-foreground", v.noticeBg)}>
                     Le titulaire atteste l’exactitude des informations transmises et accepte le règlement intérieur JSCA.
                   </div>
 
-                  <div className="mt-2 grid grid-cols-2 gap-3 text-[10px] text-muted-foreground">
-                    <div className="space-y-4">
-                      <p>Signature du joueur / représentant légal</p>
+                  <div className={cn(L.signatures, "text-muted-foreground")}>
+                    <div>
+                      <p>Signature joueur / représentant</p>
                       <div className="h-px bg-border" />
                     </div>
-                    <div className="space-y-4">
-                      <p>Cachet & visa du club</p>
+                    <div>
+                      <p>Cachet & visa club</p>
                       <div className="h-px bg-border" />
                     </div>
                   </div>

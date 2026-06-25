@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useJscaStore } from "@/stores/use-jsca-store";
 import { CLUB_CONTACT } from "@/lib/constants";
 import { getPlayerLicenceTheme } from "@/lib/licence-card-themes";
+import { licenceCardClasses as L } from "@/lib/licence-card-layout";
 import { cn } from "@/lib/utils";
 import type { Player } from "@/types";
 
@@ -64,57 +65,34 @@ function RectoCard({
           t.overlay,
         )}
       />
-      <CardContent className="relative h-full print:h-auto p-4">
-        <div className="flex h-full print:h-auto gap-4">
-          <div
-            className={cn(
-              "flex w-[36mm] shrink-0 flex-col justify-between rounded-2xl border p-2.5",
-              t.sidebar,
-            )}
-          >
-            <div className="flex items-center justify-between gap-2">
-              <Image src="/jsca-logo.svg" alt="JSCA" width={40} height={40} className="h-9 w-9" priority />
-              <div
-                className={cn(
-                  "rounded-xl px-2 py-1 text-[11px] font-extrabold tracking-wide",
-                  t.numberPill,
-                )}
-              >
-                {sportNumber || "—"}
-              </div>
+      <CardContent className={cn("relative", L.content)}>
+        <div className={L.body}>
+          <div className={cn(L.sidebar, t.sidebar)}>
+            <div className="flex items-center justify-between gap-1">
+              <Image src="/jsca-logo.svg" alt="JSCA" width={40} height={40} className={L.logo} priority />
+              <div className={cn(L.numberPill, t.numberPill)}>{sportNumber || "—"}</div>
             </div>
 
-            <div className={cn("mt-2 overflow-hidden rounded-xl bg-muted/20", t.photoFrame)}>
+            <div className={cn(L.photoSlot, t.photoFrame)}>
               {p.photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={p.photoUrl} alt="" className="h-[45mm] w-full object-cover" />
+                <img src={p.photoUrl} alt="" className={L.photoImg} />
               ) : (
-                <div className="flex h-[45mm] w-full items-center justify-center text-[10px] text-muted-foreground">
-                  Photo 3.5×4.5
-                </div>
+                <div className={cn(L.photoImg, "flex items-center justify-center text-muted-foreground")}>Photo</div>
               )}
             </div>
 
-            <div
-              className={cn(
-                "mt-2 rounded-xl border px-2 py-1.5 text-[10px] font-semibold text-muted-foreground",
-                t.jscaBar,
-              )}
-            >
-              JSCA · 1986
-            </div>
+            <div className={cn(L.jscaBar, t.jscaBar)}>JSCA · 1986</div>
           </div>
 
-          <div className="flex min-w-0 flex-1 flex-col justify-between">
-            <div className="flex items-start gap-3">
-              <div className="min-w-0 flex-1 space-y-1.5">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
-                  LICENCE CLUB JSCA
-                </p>
-                <p className="truncate text-lg font-semibold leading-tight">
+          <div className="flex min-w-0 flex-1 flex-col justify-between min-h-0">
+            <div className="flex items-start gap-1.5">
+              <div className="min-w-0 flex-1 space-y-0.5">
+                <p className={cn(L.kicker, "font-semibold uppercase text-muted-foreground")}>LICENCE CLUB JSCA</p>
+                <p className={cn(L.name, "truncate")}>
                   {p.lastName.toUpperCase()} {p.firstName}
                 </p>
-                <p className="text-[11px] text-muted-foreground">
+                <p className={cn(L.meta, "text-muted-foreground")}>
                   Licence <span className="font-semibold text-foreground">{p.licenseNumber?.trim() || "—"}</span>
                 </p>
               </div>
@@ -123,15 +101,12 @@ function RectoCard({
                 alt="JSCA"
                 width={72}
                 height={72}
-                className={cn(
-                  "h-[72px] w-[72px] shrink-0 rounded-full object-cover shadow-sm print:h-[18mm] print:w-[18mm]",
-                  t.emblemRing,
-                )}
+                className={cn(L.emblem, "rounded-full object-cover shadow-sm", t.emblemRing)}
                 priority
               />
             </div>
 
-            <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
+            <div className={L.fields}>
               <p className="truncate">
                 <span className="text-muted-foreground">Section</span> · {p.branch}
               </p>
@@ -155,17 +130,12 @@ function RectoCard({
               </p>
             </div>
 
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              <span className={cn("text-[10px]", t.badgeSeason)}>Saison 2025/2026</span>
-              <span className={cn("text-[10px]", t.badgeOfficial)}>Officiel</span>
+            <div className={L.badges}>
+              <span className={t.badgeSeason}>Saison 2025/2026</span>
+              <span className={t.badgeOfficial}>Officiel</span>
             </div>
 
-            <div
-              className={cn(
-                "mt-2 rounded-xl border px-2.5 py-2 text-[10px] text-muted-foreground",
-                t.contactStrip,
-              )}
-            >
+            <div className={cn(L.strip, t.contactStrip)}>
               {CLUB_CONTACT.email} · {CLUB_CONTACT.phone}
             </div>
           </div>
@@ -195,34 +165,27 @@ function VersoCard({
         v.cardBorder,
       )}
     >
-      <CardContent className="relative h-full print:h-auto p-4 text-sm">
-        <div className="flex h-full print:h-auto flex-col justify-between">
-          <div className={cn("flex items-start justify-between gap-3 pb-2", v.headerRule)}>
+      <CardContent className={cn("relative", L.content)}>
+        <div className={L.versoBody}>
+          <div className={cn(L.versoHeader, v.headerRule)}>
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <Image src="/jsca-logo.svg" alt="JSCA" width={30} height={30} className="h-7 w-7" priority />
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">Verso administratif</p>
-                  <p className="truncate text-sm font-semibold">
+              <div className="flex items-center gap-1">
+                <Image src="/jsca-logo.svg" alt="JSCA" width={30} height={30} className={L.logo} priority />
+                <div className="min-w-0">
+                  <p className={cn(L.kicker, "font-semibold uppercase text-muted-foreground")}>Verso administratif</p>
+                  <p className={cn(L.name, "truncate")}>
                     {p.lastName} {p.firstName} · N° {sportNumber || "—"}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-start">
-              <div
-                className={cn(
-                  "flex h-[26mm] w-[26mm] items-center justify-center rounded-xl border border-dashed p-1",
-                  v.qrFrame,
-                )}
-              >
-                <QRCode value={qrValue} size={96} className="h-full w-full" />
-              </div>
+            <div className={cn(L.qr, "border border-dashed", v.qrFrame)}>
+              <QRCode value={qrValue} size={64} />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-3 gap-y-1 pt-2 text-[11px]">
+          <div className={L.fields}>
             <p className="col-span-2 truncate">
               <span className="text-muted-foreground">Adresse :</span> {p.address || "—"}
             </p>
@@ -237,22 +200,17 @@ function VersoCard({
             </p>
           </div>
 
-          <div
-            className={cn(
-              "mt-2 rounded-xl border border-transparent p-2 text-[10px] leading-snug text-muted-foreground",
-              v.noticeBg,
-            )}
-          >
+          <div className={cn(L.notice, "border border-transparent text-muted-foreground", v.noticeBg)}>
             Le titulaire atteste l’exactitude des informations transmises et accepte le règlement intérieur JSCA.
           </div>
 
-          <div className="mt-2 grid grid-cols-2 gap-3 text-[10px] text-muted-foreground">
-            <div className="space-y-4">
-              <p>Signature du joueur / représentant légal</p>
+          <div className={cn(L.signatures, "text-muted-foreground")}>
+            <div>
+              <p>Signature joueur / représentant</p>
               <div className="h-px bg-border" />
             </div>
-            <div className="space-y-4">
-              <p>Cachet & visa du club</p>
+            <div>
+              <p>Cachet & visa club</p>
               <div className="h-px bg-border" />
             </div>
           </div>
@@ -345,7 +303,7 @@ function CartesDuplexPrintPage() {
         }
       />
 
-      <div className="jsca-print-sheet grid gap-8 md:grid-cols-2 print:grid-cols-2 print:gap-0" data-layout={effectiveLayout}>
+      <div className={L.sheet} data-layout={effectiveLayout}>
         {rows.flatMap((p) => {
           const sportNumber = sportNumbers.get(p.id) ?? p.sportNumber ?? "";
           const items: React.ReactNode[] = [];
